@@ -5,8 +5,10 @@ services:
     image: mariadb
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: example
+      MYSQL_ROOT_PASSWORD: tarfu
       MYSQL_DATABASE: karpeliber
+      MYSQL_USER: karpeliber
+      MYSQL_PASSWORD: karpeliber
 
   db_admin:
     image: adminer
