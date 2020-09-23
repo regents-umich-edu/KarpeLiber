@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  db:
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: karpeliber
+
+  db_admin:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+      #- .:/code:delegated
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
