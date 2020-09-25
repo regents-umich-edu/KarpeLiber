@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
-import os
+import json
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -68,19 +68,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'KarpeLiber.wsgi.application'
 
-CONFIG = os.environ
+CONFIG = json.load(open('/secrets/env.json'))
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': CONFIG.get('MYSQL_ENGINE', 'django.db.backends.mysql'),
-        'NAME': CONFIG.get('MYSQL_DATABASE', 'karpeliber'),
-        'USER': CONFIG.get('MYSQL_USER', 'karpeliber'),
-        'PASSWORD': CONFIG.get('MYSQL_PASSWORD', 'karpeliber'),
-        'HOST': CONFIG.get('MYSQL_HOST', 'db'),
-        'PORT': CONFIG.get('MYSQL_PORT', 3306),
+        'ENGINE': CONFIG.get('DB_ENGINE', 'django.db.backends.mysql'),
+        'HOST': CONFIG.get('DB_HOST', 'db'),
+        'PORT': CONFIG.get('DB_PORT', 3306),
+        'NAME': CONFIG.get('DB_NAME', 'karpeliber'),
+        'USER': CONFIG.get('DB_USER', 'karpeliber'),
+        'PASSWORD': CONFIG.get('DB_PASSWORD', 'karpeliber'),
         'OPTIONS': {'charset': 'utf8mb4'},
     },
     # 'default': {
