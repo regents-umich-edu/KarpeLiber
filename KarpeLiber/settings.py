@@ -13,10 +13,18 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 import json
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+from typing import IO
+
+# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-CONFIG = json.load(open('/secrets/env.json'))
+configFile: IO
+try:
+    configFile = open('/secrets/env.json')
+except FileNotFoundError:
+    configFile = open('.secrets/env.json')
+
+CONFIG = json.load(configFile)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
@@ -24,12 +32,10 @@ CONFIG = json.load(open('/secrets/env.json'))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = CONFIG.get('SECRET_KEY')
 
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = CONFIG.get('ALLOWED_HOSTS', ['127.0.0.1', 'localhost'])
-
 
 # Application definition
 
