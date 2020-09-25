@@ -16,16 +16,20 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+CONFIG = json.load(open('/secrets/env.json'))
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '*=na4-y&0%yf6hsf8rwf7+2uuj+0xrq%_b1hz+nc3xez!8*8qj'
+SECRET_KEY = CONFIG.get('SECRET_KEY')
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = CONFIG.get('ALLOWED_HOSTS', ['127.0.0.1', 'localhost'])
+
 
 # Application definition
 
@@ -67,8 +71,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'KarpeLiber.wsgi.application'
-
-CONFIG = json.load(open('/secrets/env.json'))
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
