@@ -22,6 +22,7 @@ services:
     volumes:
       - .:/code
       #- .:/code:delegated
+      - ./.secrets:/secrets
     ports:
       - "8000:8000"
     depends_on:
