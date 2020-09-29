@@ -66,6 +66,9 @@ while ! nc -z ${DB_HOST} ${DB_PORT}; do
 done
 echo 'DB is ready.'
 
+echo "Opening tunnel to DB server..."
+socat TCP-LISTEN:7777,fork TCP:${DB_HOST}:${DB_PORT} &
+
 #echo "Setting Git info variables"
 #export GIT_REPO="$(git config --local remote.origin.url)"
 #export GIT_COMMIT="$(git rev-parse HEAD)"
