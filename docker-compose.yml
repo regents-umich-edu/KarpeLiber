@@ -4,6 +4,7 @@ services:
   db:
     image: mariadb
     restart: always
+    # TODO: Add nonvolatile volume
     environment:
       MYSQL_ROOT_PASSWORD: tarfu
       MYSQL_DATABASE: karpeliber
@@ -14,16 +15,17 @@ services:
     image: adminer
     restart: always
     ports:
-      - 8080:8080
+      - "8080:8080"
 
   web:
     build: .
-    #command: python manage.py runserver 0.0.0.0:8000
+    restart: always
     volumes:
       - .:/code
       #- .:/code:delegated
       - ./.secrets:/secrets
     ports:
-      - "8000:8000"
+      - "8000:8000" # Django runserver
+      - "7778:7778" # socat tunnel to DB (DB_TUNNEL_PORT in env.json)
     depends_on:
       - db
