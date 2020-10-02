@@ -58,6 +58,7 @@ echo 'Using environment file "'${ENV_FILE}'"...'
 
 DB_HOST=$(jq -r -c ".DB_HOST | values" ${ENV_FILE})
 DB_PORT=$(jq -r -c ".DB_PORT | values" ${ENV_FILE})
+DB_TUNNEL_PORT=$(jq -r -c ".DB_TUNNEL_PORT | values" ${ENV_FILE})
 
 echo 'Checking for DB readiness...'
 while ! nc -z ${DB_HOST} ${DB_PORT}; do
@@ -66,8 +67,10 @@ while ! nc -z ${DB_HOST} ${DB_PORT}; do
 done
 echo 'DB is ready.'
 
-echo "Opening tunnel to DB server..."
-socat TCP-LISTEN:7777,fork TCP:${DB_HOST}:${DB_PORT} &
+if [ -n "${DB_TUNNEL_PORT}" ]; then
+  echo "Opening tunnel on port (${DB_TUNNEL_PORT}) to DB server at (${DB_HOST}:${DB_PORT})..."
+  socat "TCP-LISTEN:${DB_TUNNEL_PORT},fork" "TCP:${DB_HOST}:${DB_PORT}" &
+fi
 
 #echo "Setting Git info variables"
 #export GIT_REPO="$(git config --local remote.origin.url)"
@@ -85,4 +88,5 @@ socat TCP-LISTEN:7777,fork TCP:${DB_HOST}:${DB_PORT} &
 #  python manage.py site --domain="${DOMAIN}" --name="${DOMAIN}"
 #fi
 
+# TODO: DO NOT USE THIS SERVER IN A PRODUCTION SETTING (https://docs.djangoproject.com/en/3.1/ref/django-admin/#runserver)
 python manage.py runserver 0.0.0.0:8000
