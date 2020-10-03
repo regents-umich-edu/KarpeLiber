@@ -1,1 +1,1 @@
-from . import urls
+from . import apps, urls
