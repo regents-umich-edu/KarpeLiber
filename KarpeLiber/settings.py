@@ -12,10 +12,11 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 import json
 from pathlib import Path
-
 from typing import IO
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+from main.apps import MainConfig
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 configFile: IO
@@ -40,13 +41,14 @@ ALLOWED_HOSTS = CONFIG.get('ALLOWED_HOSTS', ['127.0.0.1', 'localhost'])
 # Application definition
 
 INSTALLED_APPS = [
-    'main.apps.MainConfig',
+    f'{MainConfig.__module__}.{MainConfig.__name__}',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
