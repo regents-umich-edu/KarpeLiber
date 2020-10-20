@@ -13,6 +13,13 @@ class Volume(models.Model):
     pages = models.BigIntegerField('number of pages')
     available = models.BooleanField('available online', default=False)
 
+    @property
+    def url(self):
+        # TODO: get the host and base URL from app config
+        return f'https://quod.lib.umich.edu/u/umregproc/acw7513.{self.title}.001'
+
+    url.fget.short_description = 'Library URL'
+
     def __str__(self):
         return f'{self.title} – {self.url}'
 
