@@ -14,7 +14,7 @@ class Volume(models.Model):
     available = models.BooleanField('available online', default=False)
 
     def __str__(self):
-        return self.title
+        return f'{self.title} – {self.url}'
 
 
 class Topic(models.Model):
@@ -36,7 +36,7 @@ class Item(models.Model):
     name = models.CharField(max_length=200)
     dateAdded = models.DateField('added on date')
     dateUpdated = models.DateField('updated on date')
-    topicId = models.OneToOneField(
+    topic = models.ForeignKey(
         Topic,
         related_name='items',
         on_delete=models.DO_NOTHING, )
@@ -49,11 +49,11 @@ class ItemPage(models.Model):
     class Meta:
         db_table = 'item_page'
 
-    itemId = models.OneToOneField(
+    item = models.ForeignKey(
         Item,
         related_name='itemPages',
         on_delete=models.DO_NOTHING, )
-    volumeId = models.OneToOneField(
+    volume = models.ForeignKey(
         Volume,
         related_name='volumeItemPages',
         on_delete=models.DO_NOTHING, )
@@ -66,6 +66,9 @@ class ItemPage(models.Model):
             'month',
             calendar.month_abbr[1:]).choices,
         null=True, )
+
+    def __str__(self):
+        return f'Page: {self.page} {self.name}'
 
 
 class NoteType(models.Model):
@@ -83,51 +86,54 @@ class TopicNote(models.Model):
     class Meta:
         db_table = 'topic_note'
 
-    typeId = models.OneToOneField(
+    type = models.ForeignKey(
         NoteType,
         related_name='topicNotes',
         on_delete=models.DO_NOTHING, )
-    topicId = models.OneToOneField(
+    topic = models.ForeignKey(
         Topic,
         related_name='noteTopic',
         on_delete=models.DO_NOTHING, )
     text = models.CharField(max_length=500)
-    relatedTopicId = models.OneToOneField(
+    referencedTopic = models.ForeignKey(
         Topic,
-        related_name='topicNoteRelatedTopic',
-        on_delete=models.DO_NOTHING, )
+        related_name='topicNoteReferencedTopic',
+        blank=True,
+        null=True,
+        on_delete=models.DO_NOTHING,
+    )
 
     def __str__(self):
-        return self.text
+        return f'{self.type}: {self.text}'
 
 
 class ItemNote(models.Model):
     class Meta:
         db_table = 'item_note'
 
-    typeId = models.OneToOneField(
+    type = models.ForeignKey(
         NoteType,
         related_name='itemNotes',
         on_delete=models.DO_NOTHING, )
-    itemId = models.OneToOneField(
+    item = models.ForeignKey(
         Item,
         related_name='noteItem',
         on_delete=models.DO_NOTHING, )
     text = models.CharField(max_length=500)
-    relatedTopicId = models.OneToOneField(
+    referencedTopic = models.ForeignKey(
         Topic,
-        related_name='itemNoteRelatedTopic',
+        related_name='itemNoteReferencedTopic',
         on_delete=models.DO_NOTHING, )
 
     def __str__(self):
-        return self.text
+        return f'{self.type}: {self.text}'
 
 
 class PageMapping(models.Model):
     class Meta:
         db_table = 'page_mapping'
 
-    volumeId = models.OneToOneField(
+    volume = models.ForeignKey(
         Volume,
         related_name='volume_page_mapping',
         on_delete=models.DO_NOTHING, )
