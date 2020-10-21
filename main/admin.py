@@ -4,22 +4,18 @@ from django.utils.html import format_html
 
 from main import models
 
+class KarpeLiberTabularInline(TabularInline):
+    extra = 0 # don't show "add another" rows by default
+    show_change_link = True
 
 @register(models.Topic)
 class TopicAdmin(ModelAdmin):
-    class TopicNoteInline(TabularInline):
+    class TopicNoteInline(KarpeLiberTabularInline):
         model = models.TopicNote
         fk_name = model.topic.field.name
-        classes = [
-            'collapse',
-        ]
-        extra = 0
-        show_change_link = True
 
-    class ItemInline(TabularInline):
+    class ItemInline(KarpeLiberTabularInline):
         model = models.Item
-        extra = 0
-        # show_change_link = True # gives "AttributeError" for "name"
 
     inlines = [
         TopicNoteInline,
@@ -29,11 +25,11 @@ class TopicAdmin(ModelAdmin):
 
 @register(models.Item)
 class ItemAdmin(ModelAdmin):
-    class ItemNoteInline(TabularInline):
+    class ItemNoteInline(KarpeLiberTabularInline):
         model = models.ItemNote
         fk_name = model.item.field.name
 
-    class ItemPageInline(TabularInline):
+    class ItemPageInline(KarpeLiberTabularInline):
         model = models.ItemPage
 
     inlines = [
