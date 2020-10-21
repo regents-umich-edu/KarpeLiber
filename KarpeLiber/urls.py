@@ -17,8 +17,10 @@ from django.contrib import admin
 from django.urls import include, path
 
 import main
+from main.views import topic_upload
 
 urlpatterns = [
     path(f'{main.__name__}/', include(main.urls)),
     path('admin/', admin.site.urls),
+    path('upload-csv/', topic_upload, name='topic_upload')
 ]
