@@ -1,12 +1,62 @@
+import csv
+import io
+import logging
+
 from django.contrib.admin import site, register, ModelAdmin, \
     TabularInline
+from django.forms import forms
+from django.shortcuts import redirect, render
+from django.urls import path
 from django.utils.html import format_html
 
 from main import models
 
+
+logger = logging.getLogger(__name__)
+
+
 class KarpeLiberTabularInline(TabularInline):
-    extra = 0 # don't show "add another" rows by default
+    extra = 0  # don't show "add another" rows by default
     show_change_link = True
+
+
+class CsvImportForm(forms.Form):
+    csv_file = forms.FileField()
+    csv_file.label = 'CSV file'
+    # csv_file.help_text = 'list of column names or something helpful'
+    csv_file.required = True
+
+
+@register(models.TopicNote)
+class TopicNoteAdmin(ModelAdmin):
+    change_list_template = 'entities/TopicNote_change_list.html'
+
+    def get_urls(self):
+        return [
+                   path('import-csv/', self.import_csv),
+               ] + super().get_urls()
+
+    def import_csv(self, request):
+        if request.method == 'POST':
+            csv_file = request.FILES['csv_file']
+            csv_raw_data = csv_file.read().decode('UTF-8')
+
+            csv_strings = io.StringIO(csv_raw_data)
+            # next(csv_strings)  # skip CSV header line
+
+            reader = csv.reader(csv_strings)
+            for line in reader:
+                logger.debug(line)
+            # Create objects from CSV data
+            # ...
+            self.message_user(request, 'The CSV file has been imported.')
+            return redirect('..')
+        form = CsvImportForm()
+        context = {'form': form}
+        return render(
+            request, 'admin/csv_form.html', context
+        )
+
 
 @register(models.Topic)
 class TopicAdmin(ModelAdmin):
