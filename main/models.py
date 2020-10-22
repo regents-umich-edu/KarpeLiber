@@ -21,10 +21,11 @@ class Volume(models.Model):
     url.fget.short_description = 'Library URL'
 
     def __str__(self):
-        return f'{self.title} – {self.url}'
+        return f'{self.title}'
 
 
 class Topic(models.Model):
+    objects: models.QuerySet
     class Meta:
         db_table = 'topic'
 
@@ -33,7 +34,7 @@ class Topic(models.Model):
     dateUpdated = models.DateField('updated on date')
 
     def __str__(self):
-        return self.name
+        return f'{self.name} - {self.dateAdded} - {self.dateUpdated}'
 
 
 class Item(models.Model):
@@ -75,7 +76,7 @@ class ItemPage(models.Model):
         null=True, )
 
     def __str__(self):
-        return f'Page: {self.page} {self.name}'
+        return f'Page: {self.page} {self.volume}'
 
 
 class NoteType(models.Model):
