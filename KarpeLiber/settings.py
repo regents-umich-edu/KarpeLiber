@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 import json
+import os
 from pathlib import Path
 from typing import IO
 
@@ -21,7 +22,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 configFile: IO
 try:
-    configFile = open('/secrets/env.json')
+    configFilePath = os.environ.get('KARPELIBER_CONFIG', '/secrets/env.json')
+    configFile = open(configFilePath)
 except FileNotFoundError:
     configFile = open('.secrets/env.json')
 
@@ -94,15 +96,6 @@ DATABASES = {
         'PASSWORD': CONFIG.get('DB_PASSWORD', 'karpeliber'),
         'OPTIONS': {'charset': 'utf8mb4'},
     },
-    # 'default': {
-    #     'ENGINE': ENV.get('MYSQL_ENGINE', 'django.db.backends.mysql'),
-    #     'NAME': ENV.get('MYSQL_DATABASE', 'student_dashboard'),
-    #     'USER': ENV.get('MYSQL_USER', 'student_dashboard_user'),
-    #     'PASSWORD': ENV.get('MYSQL_PASSWORD', 'student_dashboard_password'),
-    #     'HOST': ENV.get('MYSQL_HOST', 'localhost'),
-    #     'PORT': ENV.get('MYSQL_PORT', 3306),
-    #     'OPTIONS': {'charset': 'utf8mb4'},
-    # },
 }
 
 # Password validation
@@ -110,16 +103,20 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME': 'django.contrib.auth.password_validation.'
+                'UserAttributeSimilarityValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME': 'django.contrib.auth.password_validation.'
+                'MinimumLengthValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME': 'django.contrib.auth.password_validation.'
+                'CommonPasswordValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME': 'django.contrib.auth.password_validation.'
+                'NumericPasswordValidator',
     },
 ]
 
@@ -140,3 +137,27 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'class': 'logging.Formatter',
+            'style': '{',  # use `str.format()`-style formatting
+            'format':  # See: https://docs.python.org/3/library/logging.html
+                '{asctime} {levelname} [{pathname}:{lineno}] {message}',
+            'datefmt': '[%Y-%m-%d %H:%M:%S %z]',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console', ],
+        'level': str(CONFIG.get('LOG_LEVEL', 'INFO')).upper(),
+    },
+}
