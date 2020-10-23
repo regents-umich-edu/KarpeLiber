@@ -1,9 +1,12 @@
 import calendar
+import datetime
 
 from django.db import models
 
 
 class Volume(models.Model):
+    objects: models.QuerySet
+
     class Meta:
         db_table = 'volume'
 
@@ -26,34 +29,46 @@ class Volume(models.Model):
 
 class Topic(models.Model):
     objects: models.QuerySet
+
     class Meta:
         db_table = 'topic'
 
-    name = models.CharField(max_length=200)
-    dateAdded = models.DateField('added on date')
-    dateUpdated = models.DateField('updated on date')
+    name = models.CharField(max_length=200, unique=True)
+    dateAdded = models.DateField('added on date', default=datetime.date.today)
+    dateUpdated = models.DateField('updated on date',
+                                   default=datetime.date.today)
 
     def __str__(self):
         return f'{self.name} - {self.dateAdded} - {self.dateUpdated}'
 
 
 class Item(models.Model):
+    objects: models.QuerySet
+
     class Meta:
         db_table = 'item'
+        constraints = (
+            models.UniqueConstraint(fields=('name', 'topic',),
+                                    name='topic_item'),
+        )
 
     name = models.CharField(max_length=200)
-    dateAdded = models.DateField('added on date')
-    dateUpdated = models.DateField('updated on date')
     topic = models.ForeignKey(
         Topic,
         related_name='items',
         on_delete=models.DO_NOTHING, )
+    dateAdded = models.DateField('added on date', default=datetime.date.today)
+    dateUpdated = models.DateField('updated on date',
+                                   default=datetime.date.today)
 
     def __str__(self):
-        return self.name
+        # return f'{self.name} ({self.topic.name})'
+        return f'{self.name}'
 
 
 class ItemPage(models.Model):
+    objects: models.QuerySet
+
     class Meta:
         db_table = 'item_page'
 
@@ -64,9 +79,12 @@ class ItemPage(models.Model):
     volume = models.ForeignKey(
         Volume,
         related_name='volumeItemPages',
-        on_delete=models.DO_NOTHING, )
+        on_delete=models.DO_NOTHING,
+        null=True)
     page = models.IntegerField('page number')
-    date = models.DateField('date of mention')
+    date = models.DateField(
+        'date of mention',
+        null=True, )
     year = models.IntegerField('year of mention')
     month = models.IntegerField(
         'month of mention',
@@ -74,6 +92,20 @@ class ItemPage(models.Model):
             'month',
             calendar.month_abbr[1:]).choices,
         null=True, )
+
+    # TODO: calculate which volume based on date
+    # @property
+    # def volumeCalc(self):
+    #     return Volume.objects.filter()
+
+    @property
+    def dateCalc(self):
+        return self.date if self.date is not None \
+            else datetime.datetime(
+            int(self.year if self.year else 0),
+            int(self.month if self.month else 0),
+            1)
+        # else f'{int(self.year if self.year else 0)}, {self.month}, 1'
 
     def __str__(self):
         return f'Page: {self.page} {self.volume}'
