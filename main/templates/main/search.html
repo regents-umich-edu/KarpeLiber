@@ -1,0 +1,73 @@
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<table border=0 cellspacing=0 cellpadding=3 width="100%">
+    <tr>
+        <td>
+
+            <form method="get">
+                <label for="searchString">Enter the text to search for:</label>
+                <input type="text" name="searchString" id="searchString"
+                       value="{{ searchString }}">
+                <input type="submit" value="Search">
+            </form>
+        </td>
+    </tr>
+
+    {% if topics %}
+    <tr>
+        <td>
+            <p>Topics containing "{{ searchString }}",
+                sorted alphabetically:<br/>
+                (Each topic contains items about the topic.)</p>
+
+            <p>Results 1-n of {{ topics|length }}
+                <a href="?moreTopics=0&searchString={{ searchString }}">More...</a>
+            </p>
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <p>
+                {% for topic in topics %}
+                <a href="?topicId={{ topic.id }}">{{ topic }}</a>
+                ({{ topic.items.all|length }} items)<br/>
+                {% endfor %}
+            </p>
+        </td>
+    </tr>
+    {% endif %}
+
+    {% if items %}
+    <tr>
+        <td>
+            <p>Items containing "{{ searchString }}",
+                sorted alphabetically:<br/>
+                (To print pages, select an item, choose PDF format, and print
+                from the window containing the pages.)</p>
+
+            <p>Results 1-n of {{ items|length }}
+                <a href="?moreItems=0&searchString={{ searchString }}">More...</a>
+            </p>
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            {% for item in items %}
+            {% for itemPage in item.itemPages.all %}
+            <p>
+                <a href="?itemId={{ item.id }}">{{ item }}</a><br/>
+                Volume: {{ itemPage.dateCalc }};
+                Page: {{ itemPage.page }}<br/>
+                [ item date ]; [ item page number line]<br/>
+                Topic: <a href="?topicId={{ }}" {{ item.topic }} [ topic link ]
+            </p>
+            {% endfor %}
+            {% endfor %}
+        </td>
+    </tr>
+    {% endif %}
+
+    {% if items %}
+    {% endif %}
