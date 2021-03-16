@@ -67,6 +67,10 @@ while ! nc -z ${DB_HOST} ${DB_PORT}; do
 done
 echo 'DB is ready.'
 
+echo 'Applying Django migrations...'
+python manage.py migrate
+echo 'Django migrations complete.'
+
 if [ -n "${DB_TUNNEL_PORT}" ]; then
   echo "Opening tunnel on port (${DB_TUNNEL_PORT}) to DB server at (${DB_HOST}:${DB_PORT})..."
   socat "TCP-LISTEN:${DB_TUNNEL_PORT},fork" "TCP:${DB_HOST}:${DB_PORT}" &
