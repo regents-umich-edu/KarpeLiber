@@ -17,10 +17,14 @@ from django.contrib import admin
 from django.urls import include, path
 
 import main
-from main.views import topic_upload
+# from main.views import topic_upload
 
 urlpatterns = [
-    path(f'{main.__name__}/', include(main.urls)),
+    path('', include('main.urls')), # was NOT a string
     path('admin/', admin.site.urls),
-    path('upload-csv/', topic_upload, name='topic_upload')
+    # path('upload-csv/', topic_upload, name='topic_upload')
 ]
+
+admin.site.site_header = "Regents' Proceedings Index Admin"
+admin.site.site_title = "Regents' Proceedings Index Admin"
+admin.site.index_title = "Welcome to Regents' Proceedings Index Administration"

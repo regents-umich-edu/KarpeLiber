@@ -1,54 +1,57 @@
-import csv
-import datetime
-import io
+import logging
+# from datetime import datetime, timezone
 
-from django.contrib import messages
-from django.contrib.auth.decorators import permission_required
-from django.http import HttpResponse
+from django.db.models import QuerySet
+from django.http import HttpResponse, HttpRequest
 from django.shortcuts import render
+from django.utils import timezone
 
+from main.models import Topic, Item
+
+logger = logging.getLogger(__name__)
 
 def index(_):
-    return HttpResponse("Hello, world. You're at the main index.")
+    return HttpResponse('This is the main index.')
 
 
-@permission_required('admin.can_add_log_entry')
-def topic_upload(request):
-    # TODO: why importing above causes "Apps aren't loaded yet" error?
-    from main.models import Topic
-    template = 'topic_upload.html'
+def safeInt(x, base=10):
+    try:
+        result = int(x, base)
+    except (ValueError, TypeError):
+        result = None
+    return result
 
-    context = {
-        'order': 'Order of the CSV columns should be...',
-    }
 
-    if request.method == 'GET':
-        return render(request, template, context)
+def search(request: HttpRequest):
+    # x = datetime.now(timezone.utc)
+    y = timezone.localize()
+    searchString: str = request.GET.get('searchString')
+    moreTopics: int = safeInt(
+        request.GET.get('morePhrases', request.GET.get('moreTopics')))
+    moreItems: int = safeInt(request.GET.get('moreItems'))
 
-    csv_file = request.FILES['file']
+    logger.debug(searchString)
 
-    # FIXME: this is inconclusive
-    if not csv_file.name.endswith('.csv'):
-        messages.error(request, 'Not a CSV file!')
+    topics: QuerySet = None
+    items: QuerySet = None
+    if searchString:
+        # topics = Topic.objects.filter(name__icontains=searchString)
+        topics = Topic.objects.filter(name__icontains='baird')
+        logger.debug(topics)
+        # items = Item.objects.filter(name__icontains=searchString)
+        items = Item.objects.filter(name__icontains='award')
+        logger.debug(items)
+        for item in items:
+            logger.debug(item.itemPages.all())
 
-    data_set = csv_file.read().decode('UTF-8')
+    return render(request, 'main/search.html', {
+        'searchString': searchString,
+        'topics': topics,
+        'items': items,
+        'moreTopics': moreTopics,
+        'moreItems': moreItems,
+    })
 
-    # TODO: replace below with pandas CSV support
-    io_string = io.StringIO(data_set)
-    next(io_string)  # skip CSV header line
-
-    status = []
-
-    for row in csv.reader(io_string, delimiter=',', quotechar='"'):
-        _, created = Topic.objects.update_or_create(
-            name=row[0],
-            dateAdded=datetime.datetime.now(),
-            dateUpdated=datetime.datetime.now(),
-        )
-        status.append(f'{row[0]}: {"Created" if created else "Skipped"}')
-
-    context = {
-        'results': status,
-    }
-
-    return render(request, template, context)
+    # return HttpResponse(
+    #     f'This is the search feature. Search text: '
+    #     f'{"n/a" if searchString is None else repr(searchString)}')
