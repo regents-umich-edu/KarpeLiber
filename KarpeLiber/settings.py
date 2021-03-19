@@ -15,9 +15,9 @@ import os
 from pathlib import Path
 from typing import IO
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-from main.apps import MainConfig
+# from main.apps import MainConfig
 
+# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 configFile: IO
@@ -43,7 +43,8 @@ ALLOWED_HOSTS = CONFIG.get('ALLOWED_HOSTS', ['127.0.0.1', 'localhost'])
 # Application definition
 
 INSTALLED_APPS = [
-    f'{MainConfig.__module__}.{MainConfig.__name__}',
+    # f'{MainConfig.__module__}.{MainConfig.__name__}',
+    'main.apps.MainConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -68,7 +69,8 @@ ROOT_URLCONF = 'KarpeLiber.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        # 'DIRS': [], # was empty
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

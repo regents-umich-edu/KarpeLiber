@@ -1,7 +1,9 @@
 import calendar
-import datetime
 
 from django.db import models
+
+from main import timestampedmodel
+import datetime
 
 
 class Volume(models.Model):
@@ -19,7 +21,8 @@ class Volume(models.Model):
     @property
     def url(self):
         # TODO: get the host and base URL from app config
-        return f'https://quod.lib.umich.edu/u/umregproc/acw7513.{self.title}.001'
+        return f'https://quod.lib.umich.edu/' \
+               f'u/umregproc/acw7513.{self.title}.001'
 
     url.fget.short_description = 'Library URL'
 
@@ -27,22 +30,20 @@ class Volume(models.Model):
         return f'{self.title}'
 
 
-class Topic(models.Model):
+class Topic(timestampedmodel.TimeStampedModel):
     objects: models.QuerySet
 
     class Meta:
         db_table = 'topic'
 
     name = models.CharField(max_length=200, unique=True)
-    dateAdded = models.DateField('added on date', default=datetime.date.today)
-    dateUpdated = models.DateField('updated on date',
-                                   default=datetime.date.today)
+
 
     def __str__(self):
-        return f'{self.name} - {self.dateAdded} - {self.dateUpdated}'
+        return f'{self.name}'
 
 
-class Item(models.Model):
+class Item(timestampedmodel.TimeStampedModel):
     objects: models.QuerySet
 
     class Meta:
@@ -57,12 +58,8 @@ class Item(models.Model):
         Topic,
         related_name='items',
         on_delete=models.DO_NOTHING, )
-    dateAdded = models.DateField('added on date', default=datetime.date.today)
-    dateUpdated = models.DateField('updated on date',
-                                   default=datetime.date.today)
 
     def __str__(self):
-        # return f'{self.name} ({self.topic.name})'
         return f'{self.name}'
 
 
@@ -76,15 +73,18 @@ class ItemPage(models.Model):
         Item,
         related_name='itemPages',
         on_delete=models.DO_NOTHING, )
-    volume = models.ForeignKey(
-        Volume,
-        related_name='volumeItemPages',
-        on_delete=models.DO_NOTHING,
-        null=True)
+    # volume = models.ForeignKey(
+    #     Volume,
+    #     related_name='volumeItemPages',
+    #     on_delete=models.DO_NOTHING,
+    #     null=True)
     page = models.IntegerField('page number')
-    date = models.DateField(
+    date: datetime.date = models.DateField(
         'date of mention',
-        null=True, )
+        null=True,
+        # default=datetime.date.today,
+    )
+
     year = models.IntegerField('year of mention')
     month = models.IntegerField(
         'month of mention',
@@ -100,15 +100,27 @@ class ItemPage(models.Model):
 
     @property
     def dateCalc(self):
-        return self.date if self.date is not None \
-            else datetime.datetime(
-            int(self.year if self.year else 0),
-            int(self.month if self.month else 0),
-            1)
-        # else f'{int(self.year if self.year else 0)}, {self.month}, 1'
+        """
+        use date if specified, otherwise make one from year/month
+
+        if no year/month, return year only
+        else return None
+
+        :return:
+        """
+        if self.date:
+            result = self.date.strftime('%B, %Y')
+        elif self.year and self.month:
+            result = f'{calendar.month_name[self.month]}, {self.year}'
+        elif self.year:
+            result = self.year
+        else:
+            result = None
+
+        return result
 
     def __str__(self):
-        return f'Page: {self.page} {self.volume}'
+        return f'Page: {self.page} {self.date}'
 
 
 class NoteType(models.Model):
