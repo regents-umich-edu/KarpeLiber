@@ -4,7 +4,8 @@ services:
   db:
     image: mariadb
     restart: always
-    # TODO: Add nonvolatile volume
+    volumes:
+      - ./.data/mysql:/var/lib/mysql:delegated
     environment:
       MYSQL_ROOT_PASSWORD: tarfu
       MYSQL_DATABASE: karpeliber
