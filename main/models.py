@@ -1,9 +1,9 @@
 import calendar
+import datetime
 
 from django.db import models
 
 from main import timestampedmodel
-import datetime
 
 
 class Volume(models.Model):
@@ -37,7 +37,6 @@ class Topic(timestampedmodel.TimeStampedModel):
         db_table = 'topic'
 
     name = models.CharField(max_length=200, unique=True)
-
 
     def __str__(self):
         return f'{self.name}'

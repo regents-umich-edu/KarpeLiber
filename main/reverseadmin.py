@@ -5,7 +5,7 @@ from django.contrib.admin import ModelAdmin
 from django.contrib.admin.options import InlineModelAdmin
 from django.contrib.admin.utils import flatten_fieldsets
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import OneToOneField, ForeignKey
+from django.db.models import ForeignKey, OneToOneField
 from django.forms import ModelForm
 from django.forms.models import BaseModelFormSet, modelformset_factory
 

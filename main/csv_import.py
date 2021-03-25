@@ -15,6 +15,7 @@ from main.models import Topic, Item, ItemPage
 
 logger = logging.getLogger(__name__)
 
+
 class CsvImportForm(forms.Form):
     """
     Form used by ModelAdminCsvImport
