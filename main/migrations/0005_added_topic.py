@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0004_volume_change'),
     ]
@@ -13,10 +12,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Topic',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True, primary_key=True,
+                                        serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=200)),
                 ('dateAdded', models.DateField(verbose_name='added on date')),
-                ('dateUpdated', models.DateField(verbose_name='updated on date')),
+                ('dateUpdated',
+                 models.DateField(verbose_name='updated on date')),
             ],
             options={
                 'db_table': 'topic',

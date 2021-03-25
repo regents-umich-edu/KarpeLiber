@@ -1,14 +1,16 @@
 import logging
-# from datetime import datetime, timezone
 
 from django.db.models import QuerySet
 from django.http import HttpResponse, HttpRequest
 from django.shortcuts import render
 from django.utils import timezone
 
-from main.models import Topic, Item
+from main.models import Item, Topic
+
+# from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
+
 
 def index(_):
     return HttpResponse('This is the main index.')

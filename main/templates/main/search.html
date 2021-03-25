@@ -61,7 +61,7 @@
                 Volume: {{ itemPage.dateCalc }};
                 Page: {{ itemPage.page }}<br/>
                 [ item date ]; [ item page number line]<br/>
-                Topic: <a href="?topicId={{ }}" {{ item.topic }} [ topic link ]
+                Topic: <a href="?topicId={{ item.topic.id }}" {{ item.topic }} [ topic link ]
             </p>
             {% endfor %}
             {% endfor %}
