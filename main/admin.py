@@ -1,6 +1,5 @@
 from django.contrib.admin import site, register, ModelAdmin, \
     TabularInline
-from django.contrib.auth.decorators import permission_required
 from django.utils.html import format_html
 
 from main import models
@@ -29,7 +28,7 @@ class TopicAdmin(ModelAdmin):
         TopicNoteInline,
         ItemInline,
     )
-    search_fields=(Topic.name.field.name,)
+    search_fields = (Topic.name.field.name,)
 
 
 @register(models.Item)
@@ -45,7 +44,7 @@ class ItemAdmin(ModelAdminCsvImport):
         ItemNoteInline,
         ItemPageInline,
     )
-    search_fields=(models.Item.name.field.name,)
+    search_fields = (models.Item.name.field.name,)
 
 
 @register(models.ItemPage)

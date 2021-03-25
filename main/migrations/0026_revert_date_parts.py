@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0025_itempage_column_removals'),
     ]
@@ -13,12 +12,17 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='itempage',
             name='month',
-            field=models.IntegerField(choices=[(1, 'Jan'), (2, 'Feb'), (3, 'Mar'), (4, 'Apr'), (5, 'May'), (6, 'Jun'), (7, 'Jul'), (8, 'Aug'), (9, 'Sep'), (10, 'Oct'), (11, 'Nov'), (12, 'Dec')], null=True, verbose_name='month of mention'),
+            field=models.IntegerField(
+                choices=[(1, 'Jan'), (2, 'Feb'), (3, 'Mar'), (4, 'Apr'),
+                         (5, 'May'), (6, 'Jun'), (7, 'Jul'), (8, 'Aug'),
+                         (9, 'Sep'), (10, 'Oct'), (11, 'Nov'), (12, 'Dec')],
+                null=True, verbose_name='month of mention'),
         ),
         migrations.AddField(
             model_name='itempage',
             name='year',
-            field=models.IntegerField(default=None, verbose_name='year of mention'),
+            field=models.IntegerField(default=None,
+                                      verbose_name='year of mention'),
             preserve_default=False,
         ),
         migrations.AlterField(
