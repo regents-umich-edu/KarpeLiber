@@ -16,7 +16,7 @@ services:
     image: adminer
     restart: always
     ports:
-      - "8080:8080"
+      - '127.0.0.1:8080:8080'
 
   web:
     build: .
@@ -26,7 +26,7 @@ services:
       #- .:/code:delegated
       - ./.secrets:/secrets
     ports:
-      - "8000:8000" # Django runserver
-      - "7778:7778" # socat tunnel to DB (DB_TUNNEL_PORT in env.json)
+      - '127.0.0.1:8000:8000' # Django runserver
+      - '127.0.0.1:7778:7778' # socat tunnel to DB (DB_TUNNEL_PORT in env.json)
     depends_on:
       - db
