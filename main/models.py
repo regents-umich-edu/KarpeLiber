@@ -47,12 +47,15 @@ class Item(timestampedmodel.TimeStampedModel):
 
     class Meta:
         db_table = 'item'
-        constraints = (
-            models.UniqueConstraint(fields=('name', 'topic',),
-                                    name='topic_item'),
-        )
 
-    name = models.CharField(max_length=200)
+        # FIXME: requires cleaning up old data, but no time for that now
+        # FIXME: reinstate this after old data is in production
+        # constraints = (
+        #     models.UniqueConstraint(fields=('name', 'topic',),
+        #                             name='topic_item'),
+        # )
+
+    name = models.CharField(max_length=400)
     topic = models.ForeignKey(
         Topic,
         related_name='items',
@@ -145,14 +148,16 @@ class TopicNote(models.Model):
         Topic,
         related_name='noteTopic',
         on_delete=models.DO_NOTHING, )
-    text = models.CharField(max_length=500)
+    text = models.CharField(
+        max_length=500,
+        blank=True,
+        null=True, )
     referencedTopic = models.ForeignKey(
         Topic,
         related_name='topicNoteReferencedTopic',
         blank=True,
         null=True,
-        on_delete=models.DO_NOTHING,
-    )
+        on_delete=models.DO_NOTHING, )
 
     def __str__(self):
         return f'{self.type}: {self.text}'
@@ -170,10 +175,15 @@ class ItemNote(models.Model):
         Item,
         related_name='noteItem',
         on_delete=models.DO_NOTHING, )
-    text = models.CharField(max_length=500)
+    text = models.CharField(
+        max_length=500,
+        blank=True,
+        null=True, )
     referencedTopic = models.ForeignKey(
         Topic,
         related_name='itemNoteReferencedTopic',
+        blank=True,
+        null=True,
         on_delete=models.DO_NOTHING, )
 
     def __str__(self):
