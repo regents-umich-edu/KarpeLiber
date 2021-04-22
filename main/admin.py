@@ -15,11 +15,20 @@ class KarpeLiberTabularInline(TabularInline):
     show_change_link = True
 
 
+@register(models.TopicNote)
+class TopicNoteAdmin(ModelAdmin):
+    raw_id_fields = (
+        'topic',
+        'referencedTopic',
+    )
+
+
 @register(Topic)
 class TopicAdmin(ModelAdmin):
     class TopicNoteInline(KarpeLiberTabularInline):
         model = models.TopicNote
         fk_name = model.topic.field.name
+        raw_id_fields = TopicNoteAdmin.raw_id_fields
 
     class ItemInline(KarpeLiberTabularInline):
         model = models.Item
@@ -33,6 +42,14 @@ class TopicAdmin(ModelAdmin):
 
 @register(models.Item)
 class ItemAdmin(ModelAdminCsvImport):
+    # TODO: raw_id fields are good, but bring up their own edit window
+    # raw_id_fields = (
+
+    # TODO: autocomplete fields look better, but still bring up all FKs
+    autocomplete_fields = (
+        'topic',
+    )
+
     class ItemNoteInline(KarpeLiberTabularInline):
         model = models.ItemNote
         fk_name = model.item.field.name
@@ -49,7 +66,10 @@ class ItemAdmin(ModelAdminCsvImport):
 
 @register(models.ItemPage)
 class ItemPageAdmin(ModelAdminCsvImport):
-    pass
+    raw_id_fields = (
+        'item',
+        'volume',
+    )
 
 
 @register(models.Volume)
