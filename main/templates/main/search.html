@@ -13,6 +13,14 @@
         </td>
     </tr>
 
+    {% if not topics and not itemPages %}
+    <tr>
+        <td>
+            <p>No matches for "{{ searchString }}" were found.</p>
+        </td>
+    </tr>
+    {% endif %}
+
     {% if topics %}
     <tr>
         <td>
@@ -20,9 +28,13 @@
                 sorted alphabetically:<br/>
                 (Each topic contains items about the topic.)</p>
 
-            <p>Results 1-n of {{ topics|length }}
-                <a href="?moreTopics=0&searchString={{ searchString }}">More...</a>
+            <p>Results 1-{{ topics|length }} of {{ topicsTotalCount }}
+                {% if topicsTotalCount > topics|length %}
+                <a href="?moreTopics=0&searchString={{ searchString|urlencode }}">
+                    More...</a>
+                {% endif %}
             </p>
+
         </td>
     </tr>
 
@@ -30,44 +42,94 @@
         <td>
             <p>
                 {% for topic in topics %}
-                <a href="?topicId={{ topic.id }}">{{ topic }}</a>
-                ({{ topic.items.all|length }} items)<br/>
+                <a href="?topicId={{ topic.id }}&searchString={{ searchString|urlencode }}">
+                    {{ topic }}</a>
+                (Contains {{ topic.itemCount }} items.)
+                <br/>
                 {% endfor %}
             </p>
         </td>
     </tr>
     {% endif %}
 
-    {% if items %}
+    {% if itemPages %}
     <tr>
         <td>
-            <p>Items containing "{{ searchString }}",
-                sorted alphabetically:<br/>
+            <p>
+                {% if topic %}
+                {% if searchString %}
+                Return to search results for
+                "<a href="?searchString={{ searchString|urlencode }}"
+            >{{ searchString }}</a>"<br/>
+                <br/>
+                {% endif %}
+                Items contained in topic area "{{ topic }}",
+                {% else %}
+                Items containing "{{ searchString }}",
+                {% endif %}
+                sorted by date:<br/>
                 (To print pages, select an item, choose PDF format, and print
                 from the window containing the pages.)</p>
 
-            <p>Results 1-n of {{ items|length }}
-                <a href="?moreItems=0&searchString={{ searchString }}">More...</a>
+            {% if topic %}
+            <p>
+                <!-- Notes from this topic -->
+                {% for topicNote in topic.topicNotes.all %}
+                {{ topicNote.type }}:
+                {% if topicNote.text %}
+                {{ topicNote.text }}
+                {% if topicNote.referencedTopic %},{% endif %}
+                {% endif %}
+                {% if topicNote.referencedTopic %}
+                <a href="?topicId={{ topicNote.referencedTopic.id }}">
+                    {{ topicNote.referencedTopic }}</a>
+                {% endif %}
+                <br/>
+                {% endfor %}
+
+                <!-- References from notes in other topics -->
+                {% for topicNote in topic.topicNoteReferences.all %}
+                Referenced by:
+                <a href="?topicId={{ topicNote.topic.id }}">
+                    {{ topicNote.topic }}</a> ({{ topicNote.type }})
+                <br/>
+                {% endfor %}
+            </p>
+            {% endif %}
+
+            <p>Results 1-{{ itemPages|length }} of {{ itemPagesTotalCount }}
+                {% if itemPagesTotalCount > itemPages|length %}
+                <a href="?moreItems=0&searchString={{ searchString|urlencode }}">
+                    More...</a>
+                {% endif %}
             </p>
         </td>
     </tr>
 
     <tr>
         <td>
-            {% for item in items %}
-            {% for itemPage in item.itemPages.all %}
+            {% for itemPage in itemPages %}
             <p>
-                <a href="?itemId={{ item.id }}">{{ item }}</a><br/>
-                Volume: {{ itemPage.dateCalc }};
-                Page: {{ itemPage.page }}<br/>
-                [ item date ]; [ item page number line]<br/>
-                Topic: <a href="?topicId={{ item.topic.id }}" {{ item.topic }} [ topic link ]
+                {% with itemPageUrl=itemPage.url %}
+                {% if itemPageUrl %}
+                <a href="{{ itemPageUrl }}">{{ itemPage.item }}</a><br/>
+                {% else %}
+                {{ itemPage.item }}<br/>
+                <em>(This item is not yet available online.)</em><br/>
+                {% endif %}
+                {% endwith %}
+                Date: {{ itemPage.dateCalc|default_if_none:"n/a" }}<br/>
+                Volume: {{ itemPage.volume.title|default_if_none:"n/a" }};
+                Page: {{ itemPage.page|default_if_none:"n/a" }}
+                {% if not topic %}
+                <br/>
+                Found in topic area:
+                <a href="?topicId={{ itemPage.item.topic.id }}&searchString={{ searchString|urlencode }}">
+                    {{ itemPage.item.topic }}</a>
+                {% endif %}
             </p>
-            {% endfor %}
             {% endfor %}
         </td>
     </tr>
     {% endif %}
-
-    {% if items %}
-    {% endif %}
+</table>
