@@ -1,13 +1,12 @@
 import logging
+from typing import Tuple
 
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Count
 from django.http import HttpResponse, HttpRequest
-from django.shortcuts import render
-from django.utils import timezone
+from django.shortcuts import get_object_or_404, render
 
-from main.models import Item, Topic
-
-# from datetime import datetime, timezone
+from main.models import Topic, ItemPage
+from main.util import safeInt
 
 logger = logging.getLogger(__name__)
 
@@ -16,44 +15,49 @@ def index(_):
     return HttpResponse('This is the main index.')
 
 
-def safeInt(x, base=10):
-    try:
-        result = int(x, base)
-    except (ValueError, TypeError):
-        result = None
-    return result
-
-
 def search(request: HttpRequest):
-    # x = datetime.now(timezone.utc)
-    y = timezone.localize()
-    searchString: str = request.GET.get('searchString')
+    # whitespace: strip leading/trailing & reduce embedded
+    searchString: str = ' '.join(request.GET.get('searchString', '').split())
+
+    topicId: int = safeInt(
+        request.GET.get('phraseId', request.GET.get('topicId')))
     moreTopics: int = safeInt(
         request.GET.get('morePhrases', request.GET.get('moreTopics')))
     moreItems: int = safeInt(request.GET.get('moreItems'))
 
-    logger.debug(searchString)
-
+    topic: QuerySet = None
     topics: QuerySet = None
-    items: QuerySet = None
-    if searchString:
-        # topics = Topic.objects.filter(name__icontains=searchString)
-        topics = Topic.objects.filter(name__icontains='baird')
-        logger.debug(topics)
-        # items = Item.objects.filter(name__icontains=searchString)
-        items = Item.objects.filter(name__icontains='award')
-        logger.debug(items)
-        for item in items:
-            logger.debug(item.itemPages.all())
+    itemPages: QuerySet = None
 
-    return render(request, 'main/search.html', {
-        'searchString': searchString,
-        'topics': topics,
-        'items': items,
-        'moreTopics': moreTopics,
-        'moreItems': moreItems,
-    })
+    itemPagesOrderFields: Tuple[str, ...] = ('-year', 'page', 'item__name')
 
-    # return HttpResponse(
-    #     f'This is the search feature. Search text: '
-    #     f'{"n/a" if searchString is None else repr(searchString)}')
+    if searchString or topicId:
+        if topicId:
+            topic = get_object_or_404(Topic, pk=topicId)
+            logger.debug(topic)
+
+            itemPagesFilterArgs = {'item__topic': topic}
+        else:
+            topics = (Topic.objects.filter(name__icontains=searchString)
+                      .annotate(itemCount=Count('items__itemPages'))
+                      .order_by('name'))
+            logger.debug(topics)
+
+            itemPagesFilterArgs = {'item__name__icontains': searchString}
+
+        itemPages = (ItemPage.objects.filter(**itemPagesFilterArgs)
+                     .order_by(*itemPagesOrderFields))
+        logger.debug(itemPages)
+
+        return render(request, 'main/search.html', {
+            'searchString': searchString,
+            'topic': topic,
+            'topics': topics[0:15] if topics else None,
+            'topicsTotalCount': topics.count() if topics else None,
+            'itemPages': itemPages[0:10] if itemPages else None,
+            'itemPagesTotalCount': itemPages.count() if itemPages else None,
+            'moreTopics': moreTopics,
+            'moreItems': moreItems,
+        })
+    else:
+        return render(request, 'main/search.html')
