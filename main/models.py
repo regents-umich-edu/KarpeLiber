@@ -9,6 +9,7 @@ from main import timestampedmodel
 
 logger = logging.getLogger(__name__)
 
+
 class Volume(models.Model):
     objects: models.QuerySet
 
@@ -18,38 +19,39 @@ class Volume(models.Model):
     title = models.CharField(max_length=200)
     dateBegin = models.DateField('beginning date')
     dateEnd = models.DateField('ending date')
-    pages = models.BigIntegerField('number of pages')
+    pages = models.BigIntegerField('total number of pages')
     available = models.BooleanField('available online', default=False)
 
     @property
     def url(self):
         return self.makeUrl()
 
+    url.fget.short_description = 'Library URL for volume'
+
     def makeUrl(self, page: str = None) -> Optional[str]:
+        # TODO: decide whether "unavailable" volumes are available to admin
+        # TODO: make separate `adminUrl()` methods?
         if not self.available:
             return None
 
         # TODO: get the host and base URL from app config
-        # FIXME: id and dateBegin.year are both wrong (bad data
-        volumeUrl: str = f'https://quod.lib.umich.edu/' \
-                         f'u/umregproc/acw7513.{self.id}.001'
-                         # f'u/umregproc/acw7513.{self.dateBegin.year}.001'
+        volumeUrl: str = (f'https://quod.lib.umich.edu/'
+                          f'u/umregproc/acw7513.{self.id}.001')
 
         if (page):
-            pageMap: PageMapping = \
-                PageMapping.objects.filter(volume=self, page=page.zfill(8)).first()
+            # FIXME: use `pageMappings` reverse relationship instead of lookup
+            pageMap: PageMapping = (
+                PageMapping.objects.filter(volume=self, page=page).first())
 
             if (pageMap):
-                logger.debug(f'{self}, {page}, {pageMap.page}, {pageMap.imageNumber}')
+                logger.debug(
+                    f'{self}, {page}, {pageMap.page}, {pageMap.imageNumber}')
                 volumeUrl += f'/{pageMap.imageNumber}'
             else:
-                # volumeUrl += f'/{page}'
                 # Assume PageMapping always used; if no result, not available
                 volumeUrl = None
 
         return volumeUrl
-
-    url.fget.short_description = 'Library URL'
 
     def __str__(self):
         return f'{self.title}'
@@ -105,7 +107,8 @@ class ItemPage(models.Model):
         related_name='volumeItemPages',
         on_delete=models.DO_NOTHING,
         null=True)
-    page = models.IntegerField('page number')
+    # A few page numbers may be Roman numerals, have letter suffix, etc.
+    page = models.CharField('page number', max_length=20)
     date: datetime.date = models.DateField(
         'date of mention',
         null=True,
@@ -126,9 +129,9 @@ class ItemPage(models.Model):
     @property
     def url(self):
         # TODO: get the host and base URL from app config
-        return self.volume.makeUrl(str(self.page))
+        return self.volume.makeUrl(self.page)
 
-    url.fget.short_description = 'Library URL'
+    url.fget.short_description = 'Library URL for volume with page'
 
     @property
     def dateCalc(self):
@@ -173,7 +176,9 @@ class TopicNote(models.Model):
 
     type = models.ForeignKey(
         NoteType,
-        related_name='typeNotes',
+        related_name='topicNotes',
+        blank=True,
+        null=True,
         on_delete=models.DO_NOTHING, )
     topic = models.ForeignKey(
         Topic,
@@ -191,7 +196,8 @@ class TopicNote(models.Model):
         on_delete=models.DO_NOTHING, )
 
     def __str__(self):
-        noteParts = ', '.join(filter(None, (str(self.id), self.text, self.referencedTopic.name)))
+        noteParts = ', '.join(
+            filter(None, (str(self.id), self.text, self.referencedTopic.name)))
         return f'{self.type}: {noteParts}'
 
 
@@ -202,10 +208,12 @@ class ItemNote(models.Model):
     type = models.ForeignKey(
         NoteType,
         related_name='itemNotes',
+        blank=True,
+        null=True,
         on_delete=models.DO_NOTHING, )
     item = models.ForeignKey(
         Item,
-        related_name='noteItem',
+        related_name='itemNotes',
         on_delete=models.DO_NOTHING, )
     text = models.CharField(
         max_length=500,
@@ -213,7 +221,7 @@ class ItemNote(models.Model):
         null=True, )
     referencedTopic = models.ForeignKey(
         Topic,
-        related_name='itemNoteReferencedTopic',
+        related_name='itemNoteReferences',
         blank=True,
         null=True,
         on_delete=models.DO_NOTHING, )
@@ -228,7 +236,7 @@ class PageMapping(models.Model):
 
     volume = models.ForeignKey(
         Volume,
-        related_name='volume_page_mapping',
+        related_name='pageMappings',
         on_delete=models.DO_NOTHING, )
     libraryNum = models.CharField('library call number', max_length=200)
     # A few page numbers may be Roman numerals, have letter suffix, etc.
