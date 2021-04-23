@@ -21,6 +21,7 @@ class Volume(models.Model):
     dateEnd = models.DateField('ending date')
     pages = models.BigIntegerField('total number of pages')
     available = models.BooleanField('available online', default=False)
+    libraryNum = models.CharField('library call number', max_length=200)
 
     @property
     def url(self):
@@ -36,7 +37,7 @@ class Volume(models.Model):
 
         # TODO: get the host and base URL from app config
         volumeUrl: str = (f'https://quod.lib.umich.edu/'
-                          f'u/umregproc/acw7513.{self.id}.001')
+                          f'u/umregproc/{self.libraryNum}')
 
         if (page):
             # FIXME: use `pageMappings` reverse relationship instead of lookup
