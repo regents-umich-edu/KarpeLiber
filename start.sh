@@ -76,13 +76,10 @@ if [ -n "${DB_TUNNEL_PORT}" ]; then
   socat "TCP-LISTEN:${DB_TUNNEL_PORT},fork" "TCP:${DB_HOST}:${DB_PORT}" &
 fi
 
-#echo "Setting Git info variables"
-#export GIT_REPO="$(git config --local remote.origin.url)"
-#export GIT_COMMIT="$(git rev-parse HEAD)"
-#export GIT_BRANCH="$(git name-rev $GIT_COMMIT --name-only)"
-#
-#echo Running python startups
-#python manage.py migrate
+echo 'Setting Git info variables...'
+export GIT_REPO="$(git config --local remote.origin.url)"
+export GIT_COMMIT="$(git rev-parse HEAD)"
+export GIT_BRANCH="$(git name-rev $GIT_COMMIT --name-only)"
 
 #echo "Setting domain of default site record"
 ## The value for LOCALHOST_PORT is set in docker-compose.yml
