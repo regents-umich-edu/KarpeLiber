@@ -1,9 +1,10 @@
+{% load mathfilters %}
+
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
 <table border=0 cellspacing=0 cellpadding=3 width="100%">
     <tr>
         <td>
-
             <form method="get">
                 <label for="searchString">Enter the text to search for:</label>
                 <input type="text" name="searchString" id="searchString"
@@ -13,7 +14,7 @@
         </td>
     </tr>
 
-    {% if not topics and not itemPages %}
+    {% if searchString and not topics and not itemPages %}
     <tr>
         <td>
             <p>No matches for "{{ searchString }}" were found.</p>
@@ -21,17 +22,47 @@
     </tr>
     {% endif %}
 
-    {% if topics %}
+    {% if topics and moreItems is null %}
     <tr>
         <td>
+            {% if moreTopics is not null %}
+            <p>Return to search results for "<a
+                    href="/search?searchString={{ searchString|urlencode }}"
+            >{{ searchString }}</a>"</p>
+            {% endif %}
+
             <p>Topics containing "{{ searchString }}",
                 sorted alphabetically:<br/>
                 (Each topic contains items about the topic.)</p>
 
-            <p>Results 1-{{ topics|length }} of {{ topicsTotalCount }}
+            <p>
+                {% if moreTopics is not null %}
+                {% if moreTopics|add:1 > 1 %}
+                <a href="/search?moreTopics={{ moreTopics|sub:maxTopics }}&searchString={{ searchString|urlencode }}">
+                    &lt;Prev</a>
+                {% endif %}
+                {% endif %}
+
+                Results
+
+                {% if moreTopics %}
+                {{ moreTopics|add:1 }}-{{ topics|length|add:moreTopics }}
+                {% else %}
+                1-{{ topics|length }}
+                {% endif %}
+
+                of {{ topicsTotalCount }}
+
+                {% if moreTopics is not null %}
+                {% if topicsTotalCount > topics|length|add:moreTopics %}
+                <a href="/search?moreTopics={{ moreTopics|add:maxTopics }}&searchString={{ searchString|urlencode }}">
+                    Next&gt;</a>
+                {% endif %}
+                {% else %}
                 {% if topicsTotalCount > topics|length %}
-                <a href="?moreTopics=0&searchString={{ searchString|urlencode }}">
+                <a href="/search?moreTopics=0&searchString={{ searchString|urlencode }}">
                     More...</a>
+                {% endif %}
                 {% endif %}
             </p>
 
@@ -42,7 +73,7 @@
         <td>
             <p>
                 {% for topic in topics %}
-                <a href="?topicId={{ topic.id }}&searchString={{ searchString|urlencode }}">
+                <a href="/search?topicId={{ topic.id }}&searchString={{ searchString|urlencode }}&moreItems=0">
                     {{ topic }}</a>
                 (Contains {{ topic.itemCount }} items.)
                 <br/>
@@ -52,17 +83,20 @@
     </tr>
     {% endif %}
 
-    {% if itemPages %}
+    {% if itemPages and moreTopics is null %}
     <tr>
         <td>
             <p>
-                {% if topic %}
+                {% if moreItems is not null or topic %}
                 {% if searchString %}
                 Return to search results for
-                "<a href="?searchString={{ searchString|urlencode }}"
+                "<a href="/search?searchString={{ searchString|urlencode }}"
             >{{ searchString }}</a>"<br/>
                 <br/>
                 {% endif %}
+                {% endif %}
+
+                {% if topic %}
                 Items contained in topic area "{{ topic }}",
                 {% else %}
                 Items containing "{{ searchString }}",
@@ -75,33 +109,72 @@
             <p>
                 <!-- Notes from this topic -->
                 {% for topicNote in topic.topicNotes.all %}
+                {% if topicNote.type %}
                 {{ topicNote.type }}:
                 {% if topicNote.text %}
-                {{ topicNote.text }}
-                {% if topicNote.referencedTopic %},{% endif %}
+                {{ topicNote.text }}{% if topicNote.referencedTopic %},
+                {% endif %}
                 {% endif %}
                 {% if topicNote.referencedTopic %}
-                <a href="?topicId={{ topicNote.referencedTopic.id }}">
+                <a href="/search?topicId={{ topicNote.referencedTopic.id }}">
                     {{ topicNote.referencedTopic }}</a>
                 {% endif %}
                 <br/>
+                {% endif %}
                 {% endfor %}
 
                 <!-- References from notes in other topics -->
                 {% for topicNote in topic.topicNoteReferences.all %}
-                Referenced by:
-                <a href="?topicId={{ topicNote.topic.id }}">
+                {% if topicNote.type %}
+                Referenced by topic:
+                <a href="/search?topicId={{ topicNote.topic.id }}">
                     {{ topicNote.topic }}</a> ({{ topicNote.type }})
                 <br/>
+                {% endif %}
+                {% endfor %}
+
+                <!-- References from item notes -->
+                {% for itemNote in topic.itemNoteReferences.all %}
+                {% if itemNote.type %}
+                Referenced by item in topic:
+                <a href="/search?topicId={{ itemNote.item.topic.id }}">
+                    {{ itemNote.item.topic }}</a> ({{ itemNote.type }})
+                <br/>
+                {% endif %}
                 {% endfor %}
             </p>
             {% endif %}
 
-            <p>Results 1-{{ itemPages|length }} of {{ itemPagesTotalCount }}
+            <p>
+                {% if moreItems is not null %}
+                {% if moreItems|add:1 > 1 %}
+                <a href="/search?moreItems={{ moreItems|sub:maxItems }}&searchString={{ searchString|urlencode }}&topicId={{ topic.id }}">
+                    &lt;Prev</a>
+                {% endif %}
+                {% endif %}
+
+                Results
+
+                {% if moreItems %}
+                {{ moreItems|add:1 }}-{{ itemPages|length|add:moreItems }}
+                {% else %}
+                1-{{ itemPages|length }}
+                {% endif %}
+
+                of {{ itemPagesTotalCount }}
+
+                {% if moreItems is not null %}
+                {% if itemPagesTotalCount > itemPages|length|add:moreItems %}
+                <a href="/search?moreItems={{ moreItems|add:maxItems }}&searchString={{ searchString|urlencode }}&topicId={{ topic.id }}">
+                    Next&gt;</a>
+                {% endif %}
+                {% else %}
                 {% if itemPagesTotalCount > itemPages|length %}
-                <a href="?moreItems=0&searchString={{ searchString|urlencode }}">
+                <a href="/search?moreItems=0&searchString={{ searchString|urlencode }}">
                     More...</a>
                 {% endif %}
+                {% endif %}
+
             </p>
         </td>
     </tr>
@@ -124,9 +197,25 @@
                 {% if not topic %}
                 <br/>
                 Found in topic area:
-                <a href="?topicId={{ itemPage.item.topic.id }}&searchString={{ searchString|urlencode }}">
+                <a href="/search?topicId={{ itemPage.item.topic.id }}&searchString={{ searchString|urlencode }}">
                     {{ itemPage.item.topic }}</a>
                 {% endif %}
+
+                {% for itemNote in itemPage.item.itemNotes.all %}
+                {% if itemNote.type %}
+                <br/>
+                {{ itemNote.type }}:
+                {% if itemNote.text %}
+                {{ itemNote.text }}{% if itemNote.referencedTopic %},
+                {% endif %}
+                {% endif %}
+                {% if itemNote.referencedTopic %}
+                <a href="/search?topicId={{ itemNote.referencedTopic.id }}">
+                    {{ itemNote.referencedTopic }}</a>
+                {% endif %}
+                <br/>
+                {% endif %}
+                {% endfor %}
             </p>
             {% endfor %}
         </td>
