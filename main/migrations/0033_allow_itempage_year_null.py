@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0032_itempage_volume'),
     ]
@@ -13,6 +12,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='itempage',
             name='year',
-            field=models.IntegerField(blank=True, null=True, verbose_name='year of mention'),
+            field=models.IntegerField(blank=True, null=True,
+                                      verbose_name='year of mention'),
         ),
     ]

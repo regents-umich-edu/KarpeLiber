@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0036_update_note_references'),
     ]
@@ -13,7 +12,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='volume',
             name='libraryNum',
-            field=models.CharField(default='acw7513.____.001', max_length=200, verbose_name='library call number'),
+            field=models.CharField(default='acw7513.____.001', max_length=200,
+                                   verbose_name='library call number'),
             preserve_default=False,
         ),
     ]
