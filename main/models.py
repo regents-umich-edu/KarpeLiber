@@ -239,7 +239,6 @@ class PageMapping(models.Model):
         Volume,
         related_name='pageMappings',
         on_delete=models.DO_NOTHING, )
-    libraryNum = models.CharField('library call number', max_length=200)
     # A few page numbers may be Roman numerals, have letter suffix, etc.
     page = models.CharField('page number', max_length=20)
     imageNumber = models.IntegerField('image number')
