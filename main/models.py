@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 class Volume(models.Model):
     objects: models.QuerySet
+    pageMappings: models.QuerySet
 
     class Meta:
         db_table = 'volume'
@@ -30,9 +31,19 @@ class Volume(models.Model):
     url.fget.short_description = 'Library URL for volume'
 
     def makeUrl(self, page: str = None) -> Optional[str]:
+        '''
+        Some volumes may not use PageMapping.  Those cases are detected by
+        their total lack of PageMapping objects.  In those cases, return the
+        page number directly.  Otherwise, if a mapping for a page wasn't
+        found, but the volume has PageMapping objects, return `None`.  Those
+        cases are most likely mistakes in page numbers.
+
+        :param page:
+        :return:
+        '''
         # TODO: decide whether "unavailable" volumes are available to admin
         # TODO: make separate `adminUrl()` methods?
-        if not self.available:
+        if not self.available or not self.libraryNum:
             return None
 
         # TODO: get the host and base URL from app config
@@ -40,16 +51,23 @@ class Volume(models.Model):
                           f'u/umregproc/{self.libraryNum}')
 
         if (page):
-            # FIXME: use `pageMappings` reverse relationship instead of lookup
-            pageMap: PageMapping = (
-                PageMapping.objects.filter(volume=self, page=page).first())
+            pageMaps: PageMapping = (self.pageMappings.filter(page=page))
+            if len(pageMaps) > 1:
+                logger.warning(f'Multiple mappings for volume ({self.id}), '
+                               f'page ({page}).')
+
+            pageMap = pageMaps.first()
 
             if (pageMap):
                 logger.debug(
                     f'{self}, {page}, {pageMap.page}, {pageMap.imageNumber}')
                 volumeUrl += f'/{pageMap.imageNumber}'
+            elif self.pageMappings.count() == 0:
+                logger.debug(f'no pageMappings for volume {self.id}')
+                volumeUrl += f'/{page}'
             else:
-                # Assume PageMapping always used; if no result, not available
+                logger.warning(f'Volume ({self.id}) uses PageMapping, but '
+                               f"page ({page}) couldn't be found.")
                 volumeUrl = None
 
         return volumeUrl
