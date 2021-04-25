@@ -87,15 +87,15 @@ class VolumeAdmin(ModelAdmin):
         'libraryLink',
     )
 
-    def listDisplayLibraryLink(self, volume):
+    def listDisplayLibraryLink(self, volume) -> str:
         return format_html('<a target="_blank" href="{url}">↗️</a>',
-                           url=volume.url)
+                           url=volume.url) if volume.url else 'n/a'
 
     listDisplayLibraryLink.short_description = ''
 
-    def libraryLink(self, volume):
+    def libraryLink(self, volume) -> str:
         return format_html('<a target="_blank" href="{url}">{url}</a> ↗️',
-                           url=volume.url)
+                           url=volume.url) if volume.url else 'n/a'
 
     libraryLink.short_description = 'Library link'
 
