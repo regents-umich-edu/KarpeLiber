@@ -81,6 +81,16 @@
             </p>
         </td>
     </tr>
+    {% else %}
+    <tr>
+        <td>
+            <p>
+                No matching topic areas were found. See matching items below.
+                <br/>
+                <br/>
+            </p>
+        </td>
+    </tr>
     {% endif %}
 
     {% if itemPages and moreTopics is null %}
