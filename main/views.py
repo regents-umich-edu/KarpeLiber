@@ -1,12 +1,12 @@
 import logging
 from typing import Tuple, Optional
 
-from django.db.models import QuerySet, Count
+from django.db.models import QuerySet, Count, Q
 from django.http import HttpResponse, HttpRequest
 from django.shortcuts import get_object_or_404, render
 
 from main.models import Topic, ItemPage
-from main.util import safeInt
+from main.util import safeInt, queryAllWords
 
 logger = logging.getLogger(__name__)
 
@@ -33,25 +33,27 @@ def search(request: HttpRequest):
     maxItems = 25 if moreItems is not None else 10
 
     itemPagesOrderFields: Tuple[str, ...] = ('-year', 'page', 'item__name')
-    itemPagesFilterArgs: Optional[dict[str, str]] = None
+    itemPagesFilterArgs: Optional[Q] = None
 
     if searchString or topicId:
         if topicId:
             topic = get_object_or_404(Topic, pk=topicId)
             logger.debug(topic)
 
-            itemPagesFilterArgs = {'item__topic': topic}
+            itemPagesFilterArgs = Q('item__topic', topic)
         elif not moreItems:
-            topics = (Topic.objects.filter(name__icontains=searchString)
+            topics = (Topic.objects
+                      .filter(queryAllWords('name__icontains', searchString))
                       .annotate(itemCount=Count('items__itemPages'))
                       .order_by('name'))
             logger.debug(topics)
 
         if itemPagesFilterArgs is None:
-            itemPagesFilterArgs = {'item__name__icontains': searchString}
+            itemPagesFilterArgs = queryAllWords('item__name__icontains',
+                                                searchString)
 
         if not moreTopics:
-            itemPages = (ItemPage.objects.filter(**itemPagesFilterArgs)
+            itemPages = (ItemPage.objects.filter(itemPagesFilterArgs)
                          .order_by(*itemPagesOrderFields))
             logger.debug(itemPages)
 
@@ -81,10 +83,11 @@ def search(request: HttpRequest):
         return render(request, 'main/search.html', {
             'searchString': searchString,
             'topic': topic,
-            'topics':
-                topics[topicIndex:topicIndex + maxTopics] if topics else None,
+            'topics': (topics[topicIndex:topicIndex + maxTopics]
+                       if topics else None),
             'topicsTotalCount': topics.count() if topics else None,
-            'itemPages': itemPages[itemIndex:itemIndex + maxItems] if itemPages else None,
+            'itemPages': (itemPages[itemIndex:itemIndex + maxItems]
+                          if itemPages else None),
             'itemPagesTotalCount': itemPages.count() if itemPages else None,
             'moreTopics': moreTopics,
             'moreItems': moreItems,
