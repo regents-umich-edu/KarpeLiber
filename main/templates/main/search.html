@@ -180,7 +180,7 @@
                 {% endif %}
                 {% else %}
                 {% if itemPagesTotalCount > itemPages|length %}
-                <a href="/search?moreItems=0&searchString={{ searchString|urlencode }}">
+                <a href="/search?moreItems=0&searchString={{ searchString|urlencode }}&topicId={{ topic.id }}">
                     More...</a>
                 {% endif %}
                 {% endif %}
@@ -207,7 +207,7 @@
                 {% if not topic %}
                 <br/>
                 Found in topic area:
-                <a href="/search?topicId={{ itemPage.item.topic.id }}&searchString={{ searchString|urlencode }}">
+                <a href="/search?topicId={{ itemPage.item.topic.id }}&searchString={{ searchString|urlencode }}&moreItems=0">
                     {{ itemPage.item.topic }}</a>
                 {% endif %}
 
