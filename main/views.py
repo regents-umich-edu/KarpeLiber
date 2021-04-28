@@ -40,7 +40,8 @@ def search(request: HttpRequest):
             topic = get_object_or_404(Topic, pk=topicId)
             logger.debug(topic)
 
-            itemPagesFilterArgs = Q('item__topic', topic)
+            itemPagesFilterArgs = Q(('item__topic', topic))
+
         elif not moreItems:
             topics = (Topic.objects
                       .filter(queryAllWords('name__icontains', searchString))
