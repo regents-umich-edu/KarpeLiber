@@ -1,0 +1,277 @@
+Find duplicate topic names, ignoring case and trimming spaces
+
+SELECT
+  lower(trim(t."name")) "name",
+  count(*) AS "count"
+FROM
+  REGNTPRO.V_TOPIC t
+GROUP BY
+  lower(trim(t."name"))
+HAVING 
+  count(*) > 1
+
+- - - - - - - - - - -
+
+Remove topic note references to non-existant topics
+
+UPDATE
+  PHRASE_NOTES pn
+SET
+  pn.RELRPPHRASEIDNUM = NULL
+WHERE
+  pn.RELRPPHRASEIDNUM IN (
+    SELECT
+      vtn."referencedTopic_id"
+    FROM
+      REGNTPRO.V_TOPIC_NOTE vtn
+    LEFT JOIN REGNTPRO.V_TOPIC vt ON
+      vtn."referencedTopic_id" = vt."id"
+    WHERE
+      vt."id" IS NULL
+      AND VTN."referencedTopic_id" IS NOT NULL
+  )
+
+- - - - - - - - - - -
+
+item_page rows with invalid volume names
+
+SELECT
+  DISTINCT RPCALYEAR,
+  count(*)
+FROM
+  REGNTPRO.ITEM_PAGE x
+WHERE
+  VOLUMEID IS NULL
+  AND RPCALYEAR LIKE '____-__'
+GROUP BY
+  RPCALYEAR
+
+
+- - - - - - - - - - -
+
+Add link to volume for item_page rows with valid volume names
+
+UPDATE
+  REGNTPRO.ITEM_PAGE ip
+SET
+  ip.VOLUMEID = (
+    SELECT
+      v.id
+    FROM
+      REGNTPRO.VOLUME v
+    WHERE
+      v.DESCRIPTION = ip.RPCALYEAR
+  )
+WHERE
+  ip.VOLUMEID IS NULL
+  AND ip.RPCALYEAR LIKE '____-__'
+
+
+- - - - - - - - - - -
+
+Replace invalid volume name with corrected one
+
+UPDATE
+  REGNTPRO.ITEM_PAGE ip
+SET
+  ip.RPCALYEAR = '1984-87'
+WHERE
+  ip.RPCALYEAR = '1948-87'
+  
+
+- - - - - - - - - - - -
+
+Testing and adding item notes to items with invalid volumes.
+
+SELECT
+  RPNOTETYPECD,
+  RPNOTETXT,
+  RPITEMIDNUM,
+  rownum + RPITEMIDNUM noteid
+FROM
+  (
+    SELECT
+      DISTINCT 'NO' RPNOTETYPECD,
+      'Invalid volume "' || RPCALYEAR || '" was replaced.  Please verify new volume.' RPNOTETXT,
+      RPITEMIDNUM
+    FROM
+      REGNTPRO.ITEM_PAGE x
+    WHERE
+      VOLUMEID IS NULL
+  )
+
+
+After item_page volumeid has been assigned to records whose rpcalyear matches volume descriptions, add notes to each item to be corrected.  This is a more general version of an earlier query.  We don't care whether rpcalyear contains a single year or a range.
+
+If a volume note integrity constraint is violated, try adding a number (e.g., 99) to the noteid calculated column.  This may result in some items getting the same error message twice, but more is better than less.
+
+INSERT
+  INTO
+  ITEM_NOTES t (
+    RPNOTETYPECD,
+    RPNOTETXT,
+    RPITEMIDNUM,
+    NOTEID
+  ) WITH INVALID_ITEMS AS (
+    SELECT
+      RPNOTETYPECD,
+      RPNOTETXT,
+      RPITEMIDNUM,
+      rownum + RPITEMIDNUM noteid
+    FROM
+      (
+        SELECT
+          DISTINCT 'NO' RPNOTETYPECD,
+          'Invalid volume "' || RPCALYEAR || '" was replaced.  Please verify new volume.' RPNOTETXT,
+          RPITEMIDNUM
+        FROM
+          REGNTPRO.ITEM_PAGE x
+        WHERE
+          VOLUMEID IS NULL
+      )
+  )
+SELECT
+  *
+FROM
+  INVALID_ITEMS
+  
+
+
+
+- - - - - - - - - - - -
+
+To help clean up the remaining ~100 item_page records with invalid volumes...
+
+Find volumes that begin with the same four characters
+
+SELECT
+  DISTINCT ip.RPCALYEAR,
+  ip.RPITEMIDNUM,
+  v.DESCRIPTION,
+  count(*)
+FROM
+  REGNTPRO.ITEM_PAGE ip,
+  REGNTPRO.VOLUME v 
+WHERE
+  ip.VOLUMEID IS NULL
+  AND ip.RPCALYEAR LIKE '____-__'
+  AND SUBSTR(ip.RPCALYEAR,0,4) = SUBSTR(v.DESCRIPTION,0,4) 
+GROUP BY
+  ip.RPCALYEAR,
+  ip.RPITEMIDNUM,
+  v.DESCRIPTION
+
+
+The result of the above query was reasonable, so use it to update
+
+
+UPDATE
+  REGNTPRO.ITEM_PAGE ip
+SET
+  ip.RPCALYEAR = (
+    SELECT
+      v.DESCRIPTION
+    FROM
+      REGNTPRO.VOLUME v
+    WHERE
+      SUBSTR(ip.RPCALYEAR, 0, 4) = SUBSTR(v.DESCRIPTION, 0, 4)
+  )
+WHERE
+  ip.VOLUMEID IS NULL
+  AND ip.RPCALYEAR LIKE '____-__'
+  
+
+
+- - - - - - - - - - - -
+
+There are ~6663 item_page remaining without volumeid.
+They fall into two categories:
+
+1. Invalid volume single year, without month or voldate (44)
+2. Invalid volume single year, with month and voldate (1589)
+3. Invalid volume single year, without month, but with voldate (55)
+4. invalid volume single year, with month, but without voldate (4975)
+
+
+Deal with each type separately for simpler query logic.
+
+2 & 3. invalid volume, no nolumeid, with voldate (1644)
+
+UPDATE
+  REGNTPRO.ITEM_PAGE ip
+SET
+  ip.RPCALYEAR = (
+    SELECT
+      v.DESCRIPTION
+    FROM
+      REGNTPRO.VOLUME v
+    WHERE
+      ip.VOLDATE BETWEEN v.BEGINDATE AND v.ENDDATE
+  ),
+  ip.VOLUMEID = (
+    SELECT
+      v2.ID
+    FROM
+      REGNTPRO.VOLUME v2
+    WHERE
+      ip.VOLDATE BETWEEN v2.BEGINDATE AND v2.ENDDATE
+  )
+WHERE
+  ip.VOLUMEID IS NULL
+  AND ip.VOLDATE IS NOT NULL 
+
+4. invalid volume, no volumeid, with month (4975)
+
+UPDATE
+  REGNTPRO.ITEM_PAGE ip
+SET
+  (
+    ip.RPCALYEAR,
+    ip.VOLUMEID
+  ) = (
+    SELECT
+      v.DESCRIPTION ,
+      v.ID
+    FROM
+      REGNTPRO.VOLUME v
+    WHERE
+      ip.VOLUMEID IS NULL
+      AND ip.RPMONTHCD IS NOT NULL
+      AND to_date('01 ' || upper(ip.RPMONTHCD) || ' ' || ip.RPCALYEAR, 'dd MON YYYY') BETWEEN v.BEGINDATE AND v.ENDDATE
+  )
+WHERE
+  EXISTS (
+    SELECT
+      1
+    FROM
+      REGNTPRO.VOLUME v
+    WHERE
+      ip.VOLUMEID IS NULL
+      AND ip.RPMONTHCD IS NOT NULL
+      AND to_date('01 ' || upper(ip.RPMONTHCD) || ' ' || ip.RPCALYEAR, 'dd MON YYYY') BETWEEN v.BEGINDATE AND v.ENDDATE
+  )
+
+After the two update queries, that leaves 44 item_page rows without volumeid.  TThey have:
+
+* rpmonthcd = null
+* voldate = null
+* rpcalyear = null (42) or invalid (2)
+
+Can probably fix the 2 invalid manually easily.  The other 42 may take more investigating.  Or maybe the model should be set to allow for null volume.
+
+
+
+
+---------------------
+
+
+Add library numbers to volume table from pagemapping
+
+UPDATE
+  karpeliber.volume v
+INNER JOIN karpeliber.page_mapping pm ON
+  v.id = pm.volume_id SET
+  v.libraryNum = pm.libraryNum
+WHERE
+  pm.page = '1'
+
