@@ -1,9 +1,0 @@
-SELECT
-  i.RPITEMIDNUM AS "id",
-  i.RPITEMTEXT AS "name",
-  i.RPPHRASEIDNUM AS "topic_id",
-  i.RPITEMDATEADDED AS "addedTime",
-  i.RPITEMDATEUPDATED AS "updatedTime"
-FROM
-  REGNTPRO.ITEM i
-

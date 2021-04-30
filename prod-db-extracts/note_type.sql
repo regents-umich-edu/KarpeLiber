@@ -1,8 +1,0 @@
-SELECT
-  id,
-  nt.NOTETYPECD AS "code",
-  nt.NOTETYPETXT AS "name"
-FROM
-  REGNTPRO.ITEM_NOTE_TYPE_CODES nt
-ORDER BY
-  id
