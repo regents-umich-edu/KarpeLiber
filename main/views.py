@@ -16,8 +16,15 @@ def index(_):
 
 
 def search(request: HttpRequest):
+    templateName: str = 'main/search.html'
+
     # whitespace: strip leading/trailing & reduce embedded
     searchString: str = ' '.join(request.GET.get('searchString', '').split())
+
+    searchError: str = None
+    if searchString and len(searchString) < 2:
+        searchError = 'Please enter two or more characters ' \
+                      'to perform a search.'
 
     topicId: Optional[int] = safeInt(
         request.GET.get('phraseId', request.GET.get('topicId')))
@@ -27,73 +34,91 @@ def search(request: HttpRequest):
 
     topic: QuerySet = None
     topics: QuerySet = None
-    itemPages: QuerySet = None
+    items: QuerySet = None
+    maxTopics: int = None
+    maxItems: int = None
 
-    maxTopics = 25 if moreTopics is not None else 15
-    maxItems = 25 if moreItems is not None else 10
+    if not searchError:
 
-    itemPagesOrderFields: Tuple[str, ...] = ('-year', 'page', 'item__name')
-    itemPagesFilterArgs: Optional[Q] = None
+        if moreTopics is not None:
+            maxTopics = 25
+            templateName = 'main/topics.html'
+        else:
+            maxTopics = 15
 
-    if searchString or topicId:
-        if topicId:
-            topic = get_object_or_404(Topic, pk=topicId)
-            logger.debug(topic)
+        if moreItems is not None:
+            maxItems = 25
+            templateName = 'main/items.html'
+        else:
+            maxItems = 10
 
-            itemPagesFilterArgs = Q(('item__topic', topic))
+        itemOrderFields: Tuple[str, ...] = ('-year', 'page', 'item__name')
+        itemFilterArgs: Optional[Q] = None
 
-        elif not moreItems:
-            topics = (Topic.objects
-                      .filter(queryAllWords('name__icontains', searchString))
-                      .annotate(itemCount=Count('items__itemPages'))
-                      .order_by('name'))
-            logger.debug(topics)
+        if searchString or topicId:
+            if topicId:
+                topic = get_object_or_404(Topic, pk=topicId)
+                logger.debug(topic)
 
-        if itemPagesFilterArgs is None:
-            itemPagesFilterArgs = queryAllWords('item__name__icontains',
-                                                searchString)
+                itemFilterArgs = Q(('item__topic', topic))
+                templateName = 'main/topicItems.html'
 
-        if not moreTopics:
-            itemPages = (ItemPage.objects.filter(itemPagesFilterArgs)
-                         .order_by(*itemPagesOrderFields))
-            logger.debug(itemPages)
+                if moreItems is None:
+                    moreItems = 0
 
-        if moreTopics:
-            if moreTopics == len(topics):
-                moreTopics -= maxTopics
-            if moreTopics < 0:
-                moreTopics = 0
-            elif moreTopics > len(topics):
-                moreTopics = len(topics) - (len(topics) % maxTopics)
-            if moreTopics == len(topics):
-                moreTopics -= maxTopics
+            elif not moreItems:
+                topics = (Topic.objects
+                          .filter(
+                    queryAllWords('name__icontains', searchString))
+                          .annotate(itemCount=Count('items__itemPages'))
+                          .order_by('name'))
+                logger.debug(topics)
 
-        if moreItems:
-            if moreItems == len(itemPages):
-                moreItems -= maxItems
-            if moreItems < 0:
-                moreItems = 0
-            elif moreItems > len(itemPages):
-                moreItems = len(itemPages) - (len(itemPages) % maxItems)
-            if moreItems == len(itemPages):
-                moreItems -= maxItems
+            if itemFilterArgs is None:
+                itemFilterArgs = queryAllWords('item__name__icontains',
+                                               searchString)
 
-        topicIndex: int = 0 if not moreTopics else moreTopics
-        itemIndex: int = 0 if not moreItems else moreItems
+            if not moreTopics:
+                items = (ItemPage.objects.filter(itemFilterArgs)
+                         .order_by(*itemOrderFields))
+                logger.debug(items)
 
-        return render(request, 'main/search.html', {
-            'searchString': searchString,
-            'topic': topic,
-            'topics': (topics[topicIndex:topicIndex + maxTopics]
-                       if topics else None),
-            'topicsTotalCount': topics.count() if topics else None,
-            'itemPages': (itemPages[itemIndex:itemIndex + maxItems]
-                          if itemPages else None),
-            'itemPagesTotalCount': itemPages.count() if itemPages else None,
-            'moreTopics': moreTopics,
-            'moreItems': moreItems,
-            'maxTopics': maxTopics,
-            'maxItems': maxItems,
-        })
-    else:
-        return render(request, 'main/search.html')
+    if moreTopics:
+        if moreTopics == len(topics):
+            moreTopics -= maxTopics
+        if moreTopics < 0:
+            moreTopics = 0
+        elif moreTopics > len(topics):
+            moreTopics = len(topics) - (len(topics) % maxTopics)
+        if moreTopics == len(topics):
+            moreTopics -= maxTopics
+
+    if moreItems:
+        if moreItems == len(items):
+            moreItems -= maxItems
+        if moreItems < 0:
+            moreItems = 0
+        elif moreItems > len(items):
+            moreItems = len(items) - (len(items) % maxItems)
+        if moreItems == len(items):
+            moreItems -= maxItems
+
+    topicIndex: int = 0 if not moreTopics else moreTopics
+    itemIndex: int = 0 if not moreItems else moreItems
+
+    return render(request, templateName, {
+        'searchString': searchString,
+        'searchError': searchError,
+        'topic': topic,
+        'topicId': topicId,
+        'topics': (topics[topicIndex:topicIndex + maxTopics]
+                   if topics else None),
+        'topicsTotalCount': topics.count() if topics else None,
+        'items': (items[itemIndex:itemIndex + maxItems]
+                  if items else None),
+        'itemsTotalCount': items.count() if items else None,
+        'moreTopics': moreTopics,
+        'moreItems': moreItems,
+        'maxTopics': maxTopics,
+        'maxItems': maxItems,
+    })
