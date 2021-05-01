@@ -1,234 +1,146 @@
 {% load mathfilters %}
 
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+{% include "main/header.html" %}
+{% if searchError %}
+<tr>
+    <td>
+        <p>{{ searchError }}</p>
+    </td>
+</tr>
+{% else %}
+{% if searchString and not topics and not items %}
+<tr>
+    <td>
+        <p>No matches for "{{ searchString }}" were found.</p>
+    </td>
+</tr>
+{% endif %}
 
-<table border=0 cellspacing=0 cellpadding=3 width="100%">
-    <tr>
-        <td>
-            <form method="get">
-                <label for="searchString">Enter the text to search for:</label>
-                <input type="text" name="searchString" id="searchString"
-                       value="{{ searchString }}">
-                <input type="submit" value="Search">
-            </form>
-        </td>
-    </tr>
+{% if topics %}
+<tr>
+    <td>
+        <p>
+            Topics containing "{{ searchString }}",
+            sorted alphabetically:<br/>
+            (Each topic contains items about the topic.)
+        </p>
 
-    {% if searchString and not topics and not itemPages %}
-    <tr>
-        <td>
-            <p>No matches for "{{ searchString }}" were found.</p>
-        </td>
-    </tr>
-    {% endif %}
+        <p>
+            Results
 
-    {% if topics and moreItems is null %}
-    <tr>
-        <td>
-            {% if moreTopics is not null %}
-            <p>Return to search results for "<a
-                    href="/search?searchString={{ searchString|urlencode }}"
-            >{{ searchString }}</a>"</p>
+            1-{{ topics|length }}
+
+            of {{ topicsTotalCount }}
+
+            {% if topicsTotalCount > topics|length %}
+            <a href="/search?moreTopics=0&searchString={{ searchString|urlencode }}">
+                More...</a>
             {% endif %}
+        </p>
+    </td>
+</tr>
 
-            <p>Topics containing "{{ searchString }}",
-                sorted alphabetically:<br/>
-                (Each topic contains items about the topic.)</p>
-
-            <p>
-                {% if moreTopics is not null %}
-                {% if moreTopics|add:1 > 1 %}
-                <a href="/search?moreTopics={{ moreTopics|sub:maxTopics }}&searchString={{ searchString|urlencode }}">
-                    &lt;Prev</a>
-                {% endif %}
-                {% endif %}
-
-                Results
-
-                {% if moreTopics %}
-                {{ moreTopics|add:1 }}-{{ topics|length|add:moreTopics }}
-                {% else %}
-                1-{{ topics|length }}
-                {% endif %}
-
-                of {{ topicsTotalCount }}
-
-                {% if moreTopics is not null %}
-                {% if topicsTotalCount > topics|length|add:moreTopics %}
-                <a href="/search?moreTopics={{ moreTopics|add:maxTopics }}&searchString={{ searchString|urlencode }}">
-                    Next&gt;</a>
-                {% endif %}
-                {% else %}
-                {% if topicsTotalCount > topics|length %}
-                <a href="/search?moreTopics=0&searchString={{ searchString|urlencode }}">
-                    More...</a>
-                {% endif %}
-                {% endif %}
-            </p>
-
-        </td>
-    </tr>
-
-    <tr>
-        <td>
-            <p>
-                {% for topic in topics %}
-                <a href="/search?topicId={{ topic.id }}&searchString={{ searchString|urlencode }}&moreItems=0">
-                    {{ topic }}</a>
-                (Contains {{ topic.itemCount }} items.)
-                <br/>
-                {% endfor %}
-            </p>
-        </td>
-    </tr>
-    {% else %}
-    <tr>
-        <td>
-            <p>
-                No matching topic areas were found. See matching items below.
-                <br/>
-                <br/>
-            </p>
-        </td>
-    </tr>
-    {% endif %}
-
-    {% if itemPages and moreTopics is null %}
-    <tr>
-        <td>
-            <p>
-                {% if moreItems is not null or topic %}
-                {% if searchString %}
-                Return to search results for
-                "<a href="/search?searchString={{ searchString|urlencode }}"
-            >{{ searchString }}</a>"<br/>
-                <br/>
-                {% endif %}
-                {% endif %}
-
-                {% if topic %}
-                Items contained in topic area "{{ topic }}",
-                {% else %}
-                Items containing "{{ searchString }}",
-                {% endif %}
-                sorted by date:<br/>
-                (To print pages, select an item, choose PDF format, and print
-                from the window containing the pages.)</p>
-
-            {% if topic %}
-            <p>
-                <!-- Notes from this topic -->
-                {% for topicNote in topic.topicNotes.all %}
-                {% if topicNote.type %}
-                {{ topicNote.type }}:
-                {% if topicNote.text %}
-                {{ topicNote.text }}{% if topicNote.referencedTopic %},
-                {% endif %}
-                {% endif %}
-                {% if topicNote.referencedTopic %}
-                <a href="/search?topicId={{ topicNote.referencedTopic.id }}">
-                    {{ topicNote.referencedTopic }}</a>
-                {% endif %}
-                <br/>
-                {% endif %}
-                {% endfor %}
-
-                <!-- References from notes in other topics -->
-                {% for topicNote in topic.topicNoteReferences.all %}
-                {% if topicNote.type %}
-                Referenced by topic:
-                <a href="/search?topicId={{ topicNote.topic.id }}">
-                    {{ topicNote.topic }}</a> ({{ topicNote.type }})
-                <br/>
-                {% endif %}
-                {% endfor %}
-
-                <!-- References from item notes -->
-                {% for itemNote in topic.itemNoteReferences.all %}
-                {% if itemNote.type %}
-                Referenced by item in topic:
-                <a href="/search?topicId={{ itemNote.item.topic.id }}">
-                    {{ itemNote.item.topic }}</a> ({{ itemNote.type }})
-                <br/>
-                {% endif %}
-                {% endfor %}
-            </p>
-            {% endif %}
-
-            <p>
-                {% if moreItems is not null %}
-                {% if moreItems|add:1 > 1 %}
-                <a href="/search?moreItems={{ moreItems|sub:maxItems }}&searchString={{ searchString|urlencode }}&topicId={{ topic.id }}">
-                    &lt;Prev</a>
-                {% endif %}
-                {% endif %}
-
-                Results
-
-                {% if moreItems %}
-                {{ moreItems|add:1 }}-{{ itemPages|length|add:moreItems }}
-                {% else %}
-                1-{{ itemPages|length }}
-                {% endif %}
-
-                of {{ itemPagesTotalCount }}
-
-                {% if moreItems is not null %}
-                {% if itemPagesTotalCount > itemPages|length|add:moreItems %}
-                <a href="/search?moreItems={{ moreItems|add:maxItems }}&searchString={{ searchString|urlencode }}&topicId={{ topic.id }}">
-                    Next&gt;</a>
-                {% endif %}
-                {% else %}
-                {% if itemPagesTotalCount > itemPages|length %}
-                <a href="/search?moreItems=0&searchString={{ searchString|urlencode }}&topicId={{ topic.id }}">
-                    More...</a>
-                {% endif %}
-                {% endif %}
-
-            </p>
-        </td>
-    </tr>
-
-    <tr>
-        <td>
-            {% for itemPage in itemPages %}
-            <p>
-                {% with itemPageUrl=itemPage.url %}
-                {% if itemPageUrl %}
-                <a href="{{ itemPageUrl }}">{{ itemPage.item }}</a><br/>
-                {% else %}
-                {{ itemPage.item }}<br/>
-                <em>(This item is not yet available online.)</em><br/>
-                {% endif %}
-                {% endwith %}
-                Date: {{ itemPage.dateCalc|default_if_none:"n/a" }}<br/>
-                Volume: {{ itemPage.volume.title|default_if_none:"n/a" }};
-                Page: {{ itemPage.page|default_if_none:"n/a" }}
-                {% if not topic %}
-                <br/>
-                Found in topic area:
-                <a href="/search?topicId={{ itemPage.item.topic.id }}&searchString={{ searchString|urlencode }}&moreItems=0">
-                    {{ itemPage.item.topic }}</a>
-                {% endif %}
-
-                {% for itemNote in itemPage.item.itemNotes.all %}
-                {% if itemNote.type %}
-                <br/>
-                {{ itemNote.type }}:
-                {% if itemNote.text %}
-                {{ itemNote.text }}{% if itemNote.referencedTopic %},
-                {% endif %}
-                {% endif %}
-                {% if itemNote.referencedTopic %}
-                <a href="/search?topicId={{ itemNote.referencedTopic.id }}">
-                    {{ itemNote.referencedTopic }}</a>
-                {% endif %}
-                <br/>
-                {% endif %}
-                {% endfor %}
-            </p>
+<tr>
+    <td>
+        <p>
+            {% for topic in topics %}
+            <a href="/search?topicId={{ topic.id }}&searchString={{ searchString|urlencode }}&moreItems=0">
+                {{ topic }}</a>
+            (Contains {{ topic.itemCount }} items.)
+            <br/>
             {% endfor %}
-        </td>
-    </tr>
-    {% endif %}
-</table>
+        </p>
+    </td>
+</tr>
+{% else %}
+{% if items %}
+<tr>
+    <td>
+        <p>
+            No matching topic areas were found. See matching items below.
+            <br/>
+            <br/>
+        </p>
+    </td>
+</tr>
+{% endif %}
+{% endif %}
+
+{% if items %}
+<tr>
+    <td>
+        <p>
+            Items containing "{{ searchString }}",
+            sorted by date:<br/>
+            (To print pages, select an item, choose PDF format, and print
+            from the window containing the pages.)</p>
+
+        <p>
+            Results
+
+            1-{{ items|length }}
+
+            of {{ itemsTotalCount }}
+
+            {% if itemsTotalCount > items|length %}
+            <a href="/search?moreItems=0&searchString={{ searchString|urlencode }}&topicId={{ topic.id }}">
+                More...</a>
+            {% endif %}
+        </p>
+    </td>
+</tr>
+
+<tr>
+    <td>
+        {% for itemPage in items %}
+        <p>
+            {% with itemPageUrl=itemPage.url %}
+            {% if itemPageUrl %}
+            <a href="{{ itemPageUrl }}">{{ itemPage.item }}</a><br/>
+            {% else %}
+            {{ itemPage.item }}<br/>
+            <em>(This item is not yet available online.)</em><br/>
+            {% endif %}
+            {% endwith %}
+            Date: {{ itemPage.dateCalc|default_if_none:"n/a" }}<br/>
+            Volume: {{ itemPage.volume.title|default_if_none:"n/a" }};
+            Page: {{ itemPage.page|default_if_none:"n/a" }}
+            <br/>
+            Found in topic area:
+            <a href="/search?topicId={{ itemPage.item.topic.id }}&searchString={{ searchString|urlencode }}&moreItems=0">
+                {{ itemPage.item.topic }}</a>
+
+            {% for itemNote in itemPage.item.itemNotes.all %}
+            {% if itemNote.type %}
+            <br/>
+            {{ itemNote.type }}:
+            {% if itemNote.text %}
+            {{ itemNote.text }}{% if itemNote.referencedTopic %},
+            {% endif %}
+            {% endif %}
+            {% if itemNote.referencedTopic %}
+            <a href="/search?topicId={{ itemNote.referencedTopic.id }}">
+                {{ itemNote.referencedTopic }}</a>
+            {% endif %}
+            <br/>
+            {% endif %}
+            {% endfor %}
+        </p>
+        {% endfor %}
+    </td>
+</tr>
+{% else %}
+{% if topics %}
+<tr>
+    <td>
+        <p>
+            No matching items were found. See matching topics above.
+            <br/>
+            <br/>
+        </p>
+    </td>
+</tr>
+{% endif %}
+{% endif %}
+{% endif %}
+{% include "main/footer.html" %}
