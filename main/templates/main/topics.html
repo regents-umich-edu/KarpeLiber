@@ -1,0 +1,59 @@
+{% load mathfilters %}
+
+{% include "main/header.html" %}
+<tr>
+    <td>
+        <p>
+            Return to search results for "<a
+                href="/search?searchString={{ searchString|urlencode }}"
+        >{{ searchString }}</a>".
+        </p>
+    </td>
+</tr>
+{% if not topics %}
+<tr>
+    <td>
+        <p>
+            No matches for "{{ searchString }}" were found.
+        </p>
+    </td>
+</tr>
+{% else %}
+<tr>
+    <td>
+        <p>Topics containing "{{ searchString }}",
+            sorted alphabetically:<br/>
+            (Each topic contains items about the topic.)</p>
+
+        <p>
+            {% if moreTopics > 0 %}
+            <a href="/search?moreTopics={{ moreTopics|sub:maxTopics }}&searchString={{ searchString|urlencode }}">
+                &lt;Prev</a>
+            {% endif %}
+
+            Results
+
+            {{ moreTopics|add:1 }}-{{ topics|length|add:moreTopics }}
+
+            of {{ topicsTotalCount }}
+
+            {% if topicsTotalCount > topics|length|add:moreTopics %}
+            <a href="/search?moreTopics={{ moreTopics|add:maxTopics }}&searchString={{ searchString|urlencode }}">
+                Next&gt;</a>
+            {% endif %}
+        </p>
+    </td>
+</tr>
+
+<tr>
+    <td>
+        <p>
+            {% for topic in topics %}
+            <a href="?topicId={{ topic.id }}">{{ topic }}</a>
+            ({{ topic.items.all|length }} items)<br/>
+            {% endfor %}
+        </p>
+    </td>
+</tr>
+{% endif %}
+{% include "main/footer.html" %}

@@ -1,0 +1,15 @@
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<table border=0 cellspacing=0 cellpadding=3 width="100%">
+    <tr>
+        <td>
+            <form method="get">
+                <label for="searchString">Enter the text to search for:</label>
+                <input type="text" name="searchString" id="searchString"
+                       value="{{ searchString }}">
+                <input type="submit" value="Search">
+            </form>
+        </td>
+    </tr>
+
+    <!-- TODO: Add "Help" link -->

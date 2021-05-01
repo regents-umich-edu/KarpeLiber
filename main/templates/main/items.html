@@ -1,0 +1,91 @@
+{% load mathfilters %}
+
+{% include "main/header.html" %}
+<tr>
+    <td>
+        <p>
+            Return to search results for "<a
+                href="/search?searchString={{ searchString|urlencode }}"
+        >{{ searchString }}</a>".
+        </p>
+    </td>
+</tr>
+{% if not items %}
+<tr>
+    <td>
+        <p>
+            No matches for "{{ searchString }}" were found.
+        </p>
+    </td>
+</tr>
+{% else %}
+<tr>
+    <td>
+        <p>
+            Items containing "{{ searchString }}",
+            sorted by date:<br/>
+            (To print pages, select an item, choose PDF format, and print
+            from the window containing the pages.)
+        </p>
+
+        <p>
+            {% if moreItems > 0 %}
+            <a href="/search?moreItems={{ moreItems|sub:maxItems }}&searchString={{ searchString|urlencode }}">
+                &lt;Prev</a>
+            {% endif %}
+
+            Results
+
+            {{ moreItems|add:1 }}-{{ items|length|add:moreItems }}
+
+            of {{ itemsTotalCount }}
+
+            {% if itemsTotalCount > items|length|add:moreItems %}
+            <a href="/search?moreItems={{ moreItems|add:maxItems }}&searchString={{ searchString|urlencode }}">
+                Next&gt;</a>
+            {% endif %}
+        </p>
+    </td>
+</tr>
+
+<tr>
+    <td>
+        {% for item in items %}
+        <p>
+            {% with itemUrl=item.url %}
+            {% if itemUrl %}
+            <a href="{{ itemUrl }}">{{ item.item }}</a><br/>
+            {% else %}
+            {{ item.item }}<br/>
+            <em>(This item is not yet available online.)</em><br/>
+            {% endif %}
+            {% endwith %}
+            Date: {{ item.dateCalc|default_if_none:"n/a" }}<br/>
+            Volume: {{ item.volume.title|default_if_none:"n/a" }};
+            Page: {{ item.page|default_if_none:"n/a" }}
+            <br/>
+            Found in topic area:
+            <a href="/search?topicId={{ item.item.topic.id }}&searchString={{ searchString|urlencode }}&moreItems=0">
+                {{ item.item.topic }}</a>
+
+            {% for itemNote in item.item.itemNotes.all %}
+            {% if itemNote.type %}
+            <br/>
+            {{ itemNote.type }}:
+            {% if itemNote.text %}
+            {{ itemNote.text }}{% if itemNote.referencedTopic %},
+            {% endif %}
+            {% endif %}
+            {% if itemNote.referencedTopic %}
+            <a href="/search?topicId={{ itemNote.referencedTopic.id }}">
+                {{ itemNote.referencedTopic }}</a>
+            {% endif %}
+            <br/>
+            {% endif %}
+            {% endfor %}
+        </p>
+        {% endfor %}
+    </td>
+</tr>
+{% endif %}
+{% include "main/footer.html" %}
