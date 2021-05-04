@@ -17,6 +17,7 @@ class Volume(models.Model):
     class Meta:
         db_table = 'volume'
 
+    id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=200)
     dateBegin = models.DateField('beginning date')
     dateEnd = models.DateField('ending date')
@@ -82,6 +83,7 @@ class Topic(timestampedmodel.TimeStampedModel):
     class Meta:
         db_table = 'topic'
 
+    id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=200, unique=True)
 
     def __str__(self):
@@ -101,6 +103,7 @@ class Item(timestampedmodel.TimeStampedModel):
         #                             name='topic_item'),
         # )
 
+    id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=400)
     topic = models.ForeignKey(
         Topic,
@@ -117,6 +120,7 @@ class ItemPage(models.Model):
     class Meta:
         db_table = 'item_page'
 
+    id = models.AutoField(primary_key=True)
     item = models.ForeignKey(
         Item,
         related_name='itemPages',
@@ -181,6 +185,7 @@ class NoteType(models.Model):
     class Meta:
         db_table = 'note_type'
 
+    id = models.AutoField(primary_key=True)
     # FIXME: should these have `unique=True`?
     code = models.CharField(max_length=200)
     name = models.CharField(max_length=200)
@@ -193,6 +198,7 @@ class TopicNote(models.Model):
     class Meta:
         db_table = 'topic_note'
 
+    id = models.AutoField(primary_key=True)
     type = models.ForeignKey(
         NoteType,
         related_name='topicNotes',
@@ -224,6 +230,7 @@ class ItemNote(models.Model):
     class Meta:
         db_table = 'item_note'
 
+    id = models.AutoField(primary_key=True)
     type = models.ForeignKey(
         NoteType,
         related_name='itemNotes',
@@ -253,6 +260,7 @@ class PageMapping(models.Model):
     class Meta:
         db_table = 'page_mapping'
 
+    id = models.AutoField(primary_key=True)
     volume = models.ForeignKey(
         Volume,
         related_name='pageMappings',
