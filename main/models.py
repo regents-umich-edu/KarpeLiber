@@ -170,8 +170,8 @@ class ItemPage(models.Model):
             result = self.date.strftime('%B, %Y')
         elif self.year and self.month:
             result = f'{calendar.month_name[self.month]}, {self.year}'
-        elif self.year:
-            result = self.year
+        # elif self.year:
+        #     result = self.year
         else:
             result = None
 
