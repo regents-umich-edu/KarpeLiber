@@ -54,7 +54,7 @@
         <p>
             {% with itemUrl=item.url %}
             {% if itemUrl %}
-            <a href="{{ itemUrl }}">{{ item.item }}</a><br/>
+            <a href="{{ itemUrl }}" target="umdl_regntpro">{{ item.item }}</a><br/>
             {% else %}
             {{ item.item }}<br/>
             <em>(This item is not yet available online.)</em><br/>
