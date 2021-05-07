@@ -92,25 +92,25 @@
 
 <tr>
     <td>
-        {% for itemPage in items %}
+        {% for item in items %}
         <p>
-            {% with itemPageUrl=itemPage.url %}
-            {% if itemPageUrl %}
-            <a href="{{ itemPageUrl }}">{{ itemPage.item }}</a><br/>
+            {% with itemUrl=item.url %}
+            {% if itemUrl %}
+            <a href="{{ itemUrl }}" target="umdl_regntpro">{{ item.item }}</a><br/>
             {% else %}
-            {{ itemPage.item }}<br/>
+            {{ item.item }}<br/>
             <em>(This item is not yet available online.)</em><br/>
             {% endif %}
             {% endwith %}
-            Date: {{ itemPage.dateCalc|default_if_none:"n/a" }}<br/>
-            Volume: {{ itemPage.volume.title|default_if_none:"n/a" }};
-            Page: {{ itemPage.page|default_if_none:"n/a" }}
+            Date: {{ item.dateCalc|default_if_none:"n/a" }}<br/>
+            Volume: {{ item.volume.title|default_if_none:"n/a" }};
+            Page: {{ item.page|default_if_none:"n/a" }}
             <br/>
             Found in topic area:
-            <a href="/search?topicId={{ itemPage.item.topic.id }}&searchString={{ searchString|urlencode }}&moreItems=0">
-                {{ itemPage.item.topic }}</a>
+            <a href="/search?topicId={{ item.item.topic.id }}&searchString={{ searchString|urlencode }}&moreItems=0">
+                {{ item.item.topic }}</a>
 
-            {% for itemNote in itemPage.item.itemNotes.all %}
+            {% for itemNote in item.item.itemNotes.all %}
             {% if itemNote.type %}
             <br/>
             {{ itemNote.type }}:
