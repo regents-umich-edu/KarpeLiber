@@ -102,8 +102,19 @@
             <em>(This item is not yet available online.)</em><br/>
             {% endif %}
             {% endwith %}
-            Date: {{ item.dateCalc|default_if_none:"n/a" }}<br/>
-            Volume: {{ item.volume.title|default_if_none:"n/a" }};
+            Option A (n/a) - Date: {{ item.dateCalc|default_if_none:"n/a" }}
+            <br/>
+            Option B (Omit) -
+            {% if item.dateCalc %}
+            Date: {{ item.dateCalc }}
+            {% else %}
+            [[ omitted - line will not be displayed ]]
+            {% endif %}
+            <br/>
+            Option 1 (Title) - Volume: {{ item.volume.title|default_if_none:"n/a" }};
+            Page: {{ item.page|default_if_none:"n/a" }}
+            <br/>
+            Option 2 (Dates) - Volume: {{ item.volume.dateBegin|date:"M Y" }}&ndash;{{ item.volume.dateEnd|date:"M Y" }};
             Page: {{ item.page|default_if_none:"n/a" }}
             <br/>
             Found in topic area:
