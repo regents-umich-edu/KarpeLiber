@@ -29,13 +29,15 @@ class CsvImportForm(forms.Form):
 class ModelAdminCsvImport(ModelAdmin):
     """
     Add CSV import feature to top of admin change lists
+
+    Possible features:
+    1. Support Excel files directly without conversion to CSV.
+    2. Read data from Google Sheets or Google Drive.
     """
     change_list_template = 'admin/csv_import_change_list.html'
 
     def get_urls(self):
-        return [
-                   path('import-csv/', self.import_csv),
-               ] + super().get_urls()
+        return [path('import-csv/', self.import_csv), ] + super().get_urls()
 
     def import_csv(self, request):
         if request.method == 'POST':
@@ -68,6 +70,9 @@ class ModelAdminCsvImport(ModelAdmin):
                 .rename(columns=lambda s: s.lower().strip()) \
                 .rename(columns={'phrase': 'topic'}) \
                 .astype({'year': int})
+
+            # TODO: Add check for all required columns
+            # topic, item, page, year, month
 
             # dictionary of month name/abbr to number
             months = {month.lower(): index for index, month in
