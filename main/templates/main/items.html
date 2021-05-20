@@ -60,25 +60,18 @@
             <em>(This item is not yet available online.)</em><br/>
             {% endif %}
             {% endwith %}
-            Option A (n/a) - Date: {{ item.dateCalc|default_if_none:"n/a" }}
-            <br/>
-            Option B (Omit) -
             {% if item.dateCalc %}
             Date: {{ item.dateCalc }}
+            <br/>
             {% else %}
-            [[ omitted - line will not be displayed ]]
+            {% comment "Intentionally left blank" %}{% endcomment %}
             {% endif %}
-            <br/>
-            Option 1 (Title) - Volume: {{ item.volume.title|default_if_none:"n/a" }};
-            Page: {{ item.page|default_if_none:"n/a" }}
-            <br/>
-            Option 2 (Dates) - Volume: {{ item.volume.dateBegin|date:"M Y" }}&ndash;{{ item.volume.dateEnd|date:"M Y" }};
+            Volume: {{ item.volume.title|default_if_none:"n/a" }};
             Page: {{ item.page|default_if_none:"n/a" }}
             <br/>
             Found in topic area:
             <a href="/search?topicId={{ item.item.topic.id }}&searchString={{ searchString|urlencode }}&moreItems=0">
                 {{ item.item.topic }}</a>
-
             {% for itemNote in item.item.itemNotes.all %}
             {% if itemNote.type %}
             <br/>
