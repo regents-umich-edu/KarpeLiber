@@ -157,21 +157,17 @@ class ItemPage(models.Model):
     url.fget.short_description = 'Library URL for volume with page'
 
     @property
-    def dateCalc(self):
+    def dateCalc(self) -> Optional[str]:
         """
-        use date if specified, otherwise make one from year/month
+        use date if specified, otherwise make one from year/month,
+        else return `None`
 
-        if no year/month, return year only
-        else return None
-
-        :return:
+        :return: str "Mon YYYY" or none
         """
         if self.date:
-            result = self.date.strftime('%B, %Y')
+            result = self.date.strftime('%b %Y')
         elif self.year and self.month:
-            result = f'{calendar.month_name[self.month]}, {self.year}'
-        # elif self.year:
-        #     result = self.year
+            result = f'{calendar.month_abbr[self.month]} {self.year}'
         else:
             result = None
 
