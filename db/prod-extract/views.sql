@@ -105,7 +105,7 @@ WHERE
 CREATE OR REPLACE FORCE EDITIONABLE VIEW "REGNTPRO"."V_VOLUME" ("id", "title", "available", "dateBegin", "dateEnd", "pages", "libraryNum") AS 
   SELECT
   to_number(v."YEAR") AS "id",
-  v.DESCRIPTION AS "title",
+  TO_CHAR(v.BEGINDATE, 'Mon YYYY')||'–'||TO_CHAR(v.ENDDATE, 'Mon YYYY') AS "title",
   v.ISONLINE AS "available",
   v.BEGINDATE AS "dateBegin",
   v.ENDDATE AS "dateEnd",
