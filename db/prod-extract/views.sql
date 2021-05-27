@@ -37,7 +37,7 @@ CREATE OR REPLACE FORCE EDITIONABLE VIEW "REGNTPRO"."V_ITEM_PAGE" ("id", "page",
   ip.RPITEMIDNUM AS "item_id",
   ip.VOLUMEID AS "volume_id",
   EXTRACT(MONTH FROM to_date(ip.RPMONTHCD, 'Mon')) AS "month",
-  EXTRACT(YEAR FROM to_date(substr(ip.RPCALYEAR, 0, 4), 'YYYY')) AS "year"
+  decode(instr(ip.RPCALYEAR, '-'), 0, EXTRACT(YEAR FROM to_date(substr(ip.RPCALYEAR, 0, 4), 'YYYY')), NULL) AS "year"
 FROM
   REGNTPRO.ITEM_PAGE ip;
 
