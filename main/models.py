@@ -135,6 +135,7 @@ class ItemPage(models.Model):
     date: datetime.date = models.DateField(
         'date of mention',
         null=True,
+        blank=True,
         # default=datetime.date.today,
     )
     year = models.IntegerField(
@@ -147,7 +148,9 @@ class ItemPage(models.Model):
         choices=models.IntegerChoices(
             'month',
             calendar.month_abbr[1:]).choices,
-        null=True, )
+        null=True,
+        blank=True,
+    )
 
     @property
     def url(self):
