@@ -15,7 +15,8 @@ FROM
 
 CREATE OR REPLACE FORCE EDITIONABLE VIEW "REGNTPRO"."V_ITEM_NOTE" ("id", "type_id", "item_id", "text", "referencedTopic_id") AS 
   SELECT
-  to_number(i_n.RPITEMIDNUM || lpad(i_n.NOTEID, 3, '0')) AS "id",
+  ROWNUM AS "id",
+  --to_number(i_n.RPITEMIDNUM || lpad(i_n.NOTEID, 3, '0') || lpad(to_char(MOD(rownum, 100)), 2, '0')) AS "id",
   intc.ID AS "type_id",
   i_n.RPITEMIDNUM AS "item_id",
   i_n.RPNOTETXT AS "text",
