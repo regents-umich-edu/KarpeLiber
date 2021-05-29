@@ -38,7 +38,7 @@ The following describes the process of migrating data from the current productio
 2. Truncate all tables corresponding to the CSV files.  Note that because of foreign constraints, it may be necessary to use the "force" option when truncating.  (DBeaver's CSV import offers a feature to truncate tables before loading data, but it never works, hence this truncation step.)
 3. For each of the CSV files, import the data into the corresponding tables.  Ensure the following import options are specified:
    1. Set empty strings to NULL
-   2. Date/time format: "yyyy-MM-dd[ HH:mm:ss[.S]]"
+   2. Date/time format: "`yyyy-MM-dd[ HH:mm:ss[.S]]`"
 4. DBeaver won't disable referential integrity while importing CSV.  So, import tables in this order to avoid foreign constraint errors:
    1. note_type
    2. volume
@@ -52,9 +52,17 @@ The following describes the process of migrating data from the current productio
 
 ### Dump Development DB
 
-1. TODO: Add steps…
+1. `cd db/dev-dump`
+2. `./dump-local-dev.sh` — This will produce a dump file named like
+   `karpeliber_dump_𝘯𝘯𝘯𝘯𝘯𝘯𝘯𝘯𝘯𝘯𝘯𝘯𝘯𝘯.sql`
 
 ### Import Into New Production DB
 
-1. TODO: Add steps…
+1. `oc login` — If needed, open URL to get token
+2. `oc project regents-proceedings-index`
+3. `oc get pods` — Get the exact name of the running pod, like
+   `karpeliber-𝘯𝘯-𝘹𝘹𝘹𝘹𝘹`
+4. `oc port-forward karpeliber-𝘯𝘯-𝘹𝘹𝘹𝘹𝘹 7777 &`
+5. `./mysql-prod.sh < karpeliber_dump_𝘯𝘯𝘯𝘯𝘯𝘯𝘯𝘯𝘯𝘯𝘯𝘯𝘯𝘯.sql` — Use name of 
+   dump file specified in previous section 
 
