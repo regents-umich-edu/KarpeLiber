@@ -109,7 +109,6 @@
             <br/>
             {% for itemNote in item.item.itemNotes.all %}
             {% if itemNote.type %}
-            <br/>
             {{ itemNote.type }}:
             {% if itemNote.text %}
             {{ itemNote.text }}{% if itemNote.referencedTopic %},
