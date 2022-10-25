@@ -69,6 +69,9 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     'https://regents-archive-form.netlify.app',
+    'https://localhost:3000',
+    'https://regents-stage.web.itd.umich.edu',
+    'https://regents.umich.edu',
 ]
 
 ROOT_URLCONF = 'KarpeLiber.urls'
