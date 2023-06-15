@@ -49,7 +49,7 @@
     <td>
         <p>
             {% for topic in topics %}
-            <a href="?topicId={{ topic.id }}">{{ topic }}</a>
+            <a href="/search?topicId={{ topic.id }}&searchString={{ searchString|urlencode }}&moreItems=0">{{ topic }}</a>
             ({{ topic.items.all|length }} items)<br/>
             {% endfor %}
         </p>
