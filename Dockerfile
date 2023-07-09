@@ -7,7 +7,7 @@ WORKDIR /code
 COPY requirements.txt .
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        build-essential netcat vim-tiny jq git socat \
+        build-essential netcat-traditional vim-tiny jq git socat \
         default-libmysqlclient-dev && \
     pip install -r requirements.txt
 COPY . .
