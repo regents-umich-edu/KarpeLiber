@@ -1,6 +1,6 @@
 # In OpenShift, config bc to override with
 # python:3.9-slim from openshift namespace
-FROM python:3.9-slim
+FROM python:3.9.17-slim
 ENV PYTHONUNBUFFERED 1
 RUN mkdir /code
 WORKDIR /code
