@@ -23,11 +23,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+# Temporarily hard-code lowercase repo name in steps below.
+# This is a workaround for the "repository name must be lowercase" error.
+
       - name: Build Docker image
-        run: docker build -t ghcr.io/${{ github.repository }}/my-package:latest .
+#        run: docker build -t ghcr.io/${{ github.repository }}/my-package:latest .
+        run: docker build -t ghcr.io/sloanlance/karpeliber/my-package:latest .
 
       - name: Push Docker image
-        run: docker push ghcr.io/${{ github.repository }}/my-package:latest
+#        run: docker push ghcr.io/${{ github.repository }}/my-package:latest
+        run: docker push ghcr.io/sloanlance/karpeliber/my-package:latest
 
 # These steps try to build the app as a (PyPI?) package
 #      - name: Run Docker container and build package
