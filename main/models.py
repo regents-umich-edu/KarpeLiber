@@ -4,6 +4,7 @@ import logging
 from typing import Optional
 
 from django.db import models
+from django.db.models.query import QuerySet
 
 from main import timestampedmodel
 
@@ -48,18 +49,19 @@ class Volume(models.Model):
             return None
 
         # TODO: get the host and base URL from app config
-        volumeUrl: str = (f'https://quod.lib.umich.edu/'
-                          f'u/umregproc/{self.libraryNum}')
+        volumeUrl: Optional[str] = (
+            f'https://quod.lib.umich.edu/u/umregproc/{self.libraryNum}')
 
-        if (page):
-            pageMaps: PageMapping = (self.pageMappings.filter(page=page))
+        if page:
+            pageMaps: QuerySet = (
+                self.pageMappings.filter(page=page))
             if len(pageMaps) > 1:
                 logger.warning(f'Multiple mappings for volume ({self.id}), '
                                f'page ({page}).')
 
-            pageMap = pageMaps.first()
+            pageMap: PageMapping = pageMaps.first()
 
-            if (pageMap):
+            if pageMap:
                 logger.debug(
                     f'{self}, {page}, {pageMap.page}, {pageMap.imageNumber}')
                 volumeUrl += f'/{pageMap.imageNumber}'
@@ -85,6 +87,13 @@ class Topic(timestampedmodel.TimeStampedModel):
 
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=200, unique=True)
+
+    @property
+    def numItems(self) -> int:
+        # Item.objects.filter(topic=self).count()
+        return self.items.count()
+
+    numItems.fget.short_description = 'Number of items'
 
     def __str__(self):
         return f'{self.name}'
@@ -177,7 +186,7 @@ class ItemPage(models.Model):
         return result
 
     def __str__(self):
-        return f'Page: {self.page} {self.date}'
+        return f'Page {self.page} ({self.volume}, {self.date:%Y-%b})'
 
 
 class NoteType(models.Model):
@@ -220,8 +229,11 @@ class TopicNote(models.Model):
         on_delete=models.DO_NOTHING, )
 
     def __str__(self):
+        referencedTopicName = self.referencedTopic.name \
+            if self.referencedTopic else None
+        # if self.referencedTopic else '[No referenced topic]'
         noteParts = ', '.join(
-            filter(None, (str(self.id), self.text, self.referencedTopic.name)))
+            filter(None, (str(self.id), self.text, referencedTopicName)))
         return f'{self.type}: {noteParts}'
 
 
