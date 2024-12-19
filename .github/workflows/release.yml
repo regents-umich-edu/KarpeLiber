@@ -15,11 +15,11 @@ jobs:
       - name: Build Docker image
         run: docker build -t my-package:latest .
 
-      - name: Run Docker container and build package
-        run: docker run --rm -v $(pwd):/app my-package:latest /bin/bash -c "cd /app && python setup.py sdist bdist_wheel"
-
-      - name: Upload package
-        uses: actions/upload-artifact@v3
-        with:
-          name: my-package
-          path: dist/*
+#      - name: Run Docker container and build package
+#        run: docker run --rm -v $(pwd):/app my-package:latest /bin/bash -c "cd /app && python setup.py sdist bdist_wheel"
+#
+#      - name: Upload package
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: my-package
+#          path: dist/*
