@@ -1,0 +1,25 @@
+name: Build Package on Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build Docker image
+        run: docker build -t my-package:latest .
+
+      - name: Run Docker container and build package
+        run: docker run --rm -v $(pwd):/app my-package:latest /bin/bash -c "cd /app && python setup.py sdist bdist_wheel"
+
+      - name: Upload package
+        uses: actions/upload-artifact@v3
+        with:
+          name: my-package
+          path: dist/*
