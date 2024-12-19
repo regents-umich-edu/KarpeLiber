@@ -7,6 +7,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout code
@@ -33,9 +36,6 @@ jobs:
       - name: Push Docker image
 #        run: docker push ghcr.io/${{ github.repository }}/my-package:latest
         run: docker push ghcr.io/sloanlance/karpeliber/my-package:latest
-        permissions:
-          contents: read
-          packages: write
 
 # These steps try to build the app as a (PyPI?) package
 #      - name: Run Docker container and build package
