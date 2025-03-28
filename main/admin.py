@@ -7,7 +7,8 @@ from main import models
 # from django_extensions import logging
 # from main.reverseadmin import ReverseModelAdmin
 from main.csv_import import ModelAdminCsvImport
-from .models import Topic
+from main.indexformatter import ModelAdminIndexFormatter
+from .models import Topic, ItemNote, NoteType
 
 
 class KarpeLiberTabularInline(TabularInline):
@@ -33,6 +34,11 @@ class TopicAdmin(ModelAdmin):
     class ItemInline(KarpeLiberTabularInline):
         model = models.Item
 
+    list_display = (
+        'name',
+        'numItems',
+    )
+
     inlines = (
         TopicNoteInline,
         ItemInline,
@@ -42,8 +48,13 @@ class TopicAdmin(ModelAdmin):
 
 @register(models.Item)
 class ItemAdmin(ModelAdminCsvImport):
+    list_display = (
+        'name',
+        'topic',
+    )
+
     # TODO: raw_id fields are good, but bring up their own edit window
-    # raw_id_fields = (
+    # raw_id_fields = ()
 
     # TODO: autocomplete fields look better, but still bring up all FKs
     autocomplete_fields = (
@@ -73,7 +84,7 @@ class ItemPageAdmin(ModelAdminCsvImport):
 
 
 @register(models.Volume)
-class VolumeAdmin(ModelAdmin):
+class VolumeAdmin(ModelAdminIndexFormatter):
     list_display = (
         'title',
         'listDisplayLibraryLink',
@@ -89,7 +100,7 @@ class VolumeAdmin(ModelAdmin):
 
     def listDisplayLibraryLink(self, volume) -> str:
         return format_html('<a target="_blank" href="{url}">↗️</a>',
-                           url=volume.url) if volume.url else 'n/a'
+                           url=volume.url) if volume.url else '⛔'
 
     listDisplayLibraryLink.short_description = ''
 
@@ -102,6 +113,7 @@ class VolumeAdmin(ModelAdmin):
 
 # register all unregistered models to appear in admin UI
 # TODO: add a flag to models to indicate whether they should be shown/hidden
-site.register(
-    [model for model in models.__dict__.values() if
-     isinstance(model, type) and not site.is_registered(model)])
+# site.register(
+#     [model for model in models.__dict__.values() if
+#      isinstance(model, type) and not site.is_registered(model)])
+site.register([models.ItemNote, models.NoteType, models.PageMapping])
