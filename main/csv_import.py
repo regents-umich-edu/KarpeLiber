@@ -86,9 +86,8 @@ class ModelAdminCsvImport(ModelAdmin):
             self.message_user(request, f'rows after: {len(df)}',
                               level=messages.SUCCESS)
 
-            # TODO: remove `head(n)` after debugging is done
             newTopics, newItems = 0, 0
-            for row in df.head(8).itertuples():
+            for row in df.itertuples():
                 logger.debug(row)
                 self.message_user(request, row)
 
