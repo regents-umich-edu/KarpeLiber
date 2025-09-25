@@ -1,14 +1,14 @@
 import logging
 from itertools import groupby
+from urllib.parse import quote
 
 from django.contrib import messages
 from django.contrib.admin import ModelAdmin
 from django.db.models import F
 from django.db.models.query import QuerySet
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from django.urls import path
-from django.utils.http import urlquote
-
 
 from main.models import Volume, ItemPage
 
@@ -27,14 +27,7 @@ class IndexFormatter:
                  topicDelimiter: str = TOPIC_DELIMITER_DEFAULT,
                  itemDelimiter: str = ITEM_DELIMITER_DEFAULT,
                  pageDelimiter: str = PAGE_DELIMITER_DEFAULT):
-        try:
-            self.indexedVolume = Volume.objects.get(id=volumeId)
-        except Volume.DoesNotExist as e:
-            errorMessage = f'No volume found for ID ({volumeId}).'
-            logger.error(errorMessage)
-            e.args = e.args + (errorMessage,)
-            raise e
-
+        self.indexedVolume = get_object_or_404(Volume, id=volumeId)
         self.topicDelimiter: str = topicDelimiter
         self.itemDelimiter: str = itemDelimiter
         self.pageDelimiter: str = pageDelimiter
@@ -87,7 +80,7 @@ class ModelAdminIndexFormatter(ModelAdmin):
         (formattedIndex, volumeTitle) = IndexFormatter(volumeId).format()
 
         response = HttpResponse(formattedIndex, content_type='text/plain')
-        filename = urlquote(f'index_{volumeTitle}_{volumeId}.txt')
+        filename = quote(f'index_{volumeTitle}_{volumeId}.txt')
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
         return response
 
