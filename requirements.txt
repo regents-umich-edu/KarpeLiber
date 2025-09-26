@@ -9,10 +9,13 @@ django-mathfilters==1.0.0
 
 ## The following requirements were added by pip freeze:
 asgiref==3.9.2
-numpy==2.0.2
 python-dateutil==2.9.0.post0
 pytz==2025.2
 six==1.17.0
 sqlparse==0.5.3
 typing_extensions==4.15.0
 tzdata==2023.3
+
+# Moved to `apt-get` package in Dockerfile to avoid OpenShift build issues.
+#numpy==2.0.2
+
