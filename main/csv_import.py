@@ -7,7 +7,7 @@ import pandas as pd
 from django.contrib import messages
 from django.contrib.admin import ModelAdmin
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.forms import forms
+from django.forms import forms, fields
 from django.shortcuts import redirect, render
 from django.urls import path
 
@@ -20,7 +20,7 @@ class CsvImportForm(forms.Form):
     """
     Form used by ModelAdminCsvImport
     """
-    csv_file = forms.FileField()
+    csv_file = fields.FileField()
     csv_file.label = 'CSV file'
     # csv_file.help_text = 'list of column names or something helpful'
     csv_file.required = True
