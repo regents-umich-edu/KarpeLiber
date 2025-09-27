@@ -67,6 +67,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+CSRF_TRUSTED_ORIGINS = CONFIG.get('CSRF_TRUSTED_ORIGINS', [
+    'http://127.0.0.1:8000',  # For local development
+    'http://localhost:8000',  # For local development
+])
+
 CORS_ALLOWED_ORIGINS = [
     'https://regents-archive-form.netlify.app',
     'https://localhost:3000',
