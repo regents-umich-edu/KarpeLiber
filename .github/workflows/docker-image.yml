@@ -17,16 +17,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Set image tag timestamp (UNIX epoch seconds)
+        run: echo "IMAGE_TAG_TIMESTAMP=$(date +%s)" >> $GITHUB_ENV
+
       - uses: actions/checkout@v4
 
       - name: Build the Docker image
-        run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+        run: docker build . --file Dockerfile --tag my-image-name:${IMAGE_TAG_TIMESTAMP}
 
       - name: Log in to GitHub Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Tag image
-        run: docker tag my-image-name:$(date +%s) ghcr.io/${GITHUB_REPOSITORY,,}/my-image-name:latest
+        run: docker tag my-image-name:${IMAGE_TAG_TIMESTAMP} ghcr.io/${GITHUB_REPOSITORY,,}/my-image-name:latest
 
       - name: Push image
         run: docker push ghcr.io/${GITHUB_REPOSITORY,,}/my-image-name:latest
