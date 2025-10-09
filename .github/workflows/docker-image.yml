@@ -27,8 +27,8 @@ jobs:
 
       - name: Log in to GitHub Container Registry
         # Use the service account's personal access token, usually stored in org. secrets.
-        # For development and testing, add your own PAT stored in your forked repo's secrets, but don't change the name.
-        run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u serviceacct-regents-umich-edu --password-stdin
+        # For development and testing, add your own PAT stored in your forked repo's secrets.
+        run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io --password-stdin
 
       - name: Tag image
         run: docker tag my-image-name:${IMAGE_TAG_TIMESTAMP} ghcr.io/${GITHUB_REPOSITORY,,}/my-image-name:latest
