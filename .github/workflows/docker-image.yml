@@ -17,8 +17,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Set image tag timestamp (UNIX epoch seconds)
-        run: echo "IMAGE_TAG_TIMESTAMP=$(date +%s)" >> $GITHUB_ENV
+      - name: Set image tag timestamp (format similar to ISO 8601)
+        run: echo "IMAGE_TAG_TIMESTAMP=$(date -u +'%Y%m%dT%H%M%SZ')" >> $GITHUB_ENV
 
       - uses: actions/checkout@v4
 
