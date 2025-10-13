@@ -26,12 +26,20 @@ jobs:
         run: docker build . --file Dockerfile --tag my-image-name:${IMAGE_TAG_TIMESTAMP}
 
       - name: Log in to GitHub Container Registry
-        # Use the service account's personal access token, usually stored in org. secrets.
-        # For development and testing, add your own PAT stored in your forked repo's secrets, but don't change the name.
-        run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u serviceacct-regents-umich-edu --password-stdin
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: serviceacct-regents-umich-edu
+          password: ${{ secrets.GHCR_PAT }}
 
-      - name: Tag image
+      - name: Tag image as latest
         run: docker tag my-image-name:${IMAGE_TAG_TIMESTAMP} ghcr.io/${GITHUB_REPOSITORY,,}/my-image-name:latest
 
-      - name: Push image
+      - name: Tag image with unique timestamp
+        run: docker tag my-image-name:${IMAGE_TAG_TIMESTAMP} ghcr.io/${GITHUB_REPOSITORY,,}/my-image-name:${IMAGE_TAG_TIMESTAMP}
+
+      - name: Push image with latest tag
         run: docker push ghcr.io/${GITHUB_REPOSITORY,,}/my-image-name:latest
+
+      - name: Push image with unique timestamp tag
+        run: docker push ghcr.io/${GITHUB_REPOSITORY,,}/my-image-name:${IMAGE_TAG_TIMESTAMP}
