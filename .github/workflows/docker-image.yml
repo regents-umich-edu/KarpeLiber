@@ -22,6 +22,9 @@ jobs:
         run: |
           echo "IMAGE_TAG_TIMESTAMP=$(date -u +'%Y%m%dT%H%M%SZ')" >> $GITHUB_ENV
           echo "IMAGE_PATH=ghcr.io/${GITHUB_REPOSITORY,,}/${IMAGE_NAME,,}" >> $GITHUB_ENV
+
+      - name: Set tag variables
+        run: |
           echo "LATEST_TAG=${IMAGE_PATH}:latest" >> $GITHUB_ENV
           echo "TIMESTAMP_TAG=${IMAGE_PATH}:${IMAGE_TAG_TIMESTAMP}" >> $GITHUB_ENV
 
