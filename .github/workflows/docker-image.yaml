@@ -49,8 +49,8 @@ jobs:
           build-args: IMAGE_TAG_TIMESTAMP=${IMAGE_TAG_TIMESTAMP}
           push: true
           tags: |
-            ${LATEST_TAG}
-            ${TIMESTAMP_TAG}
+            ${{ LATEST_TAG }}
+            ${{ TIMESTAMP_TAG }}
 
 #      - name: Build the Docker image
 #        run: docker build . --file Dockerfile --tag ${IMAGE_NAME,,}:${IMAGE_TAG_TIMESTAMP} --build-arg IMAGE_TAG_TIMESTAMP=${IMAGE_TAG_TIMESTAMP}
