@@ -1,0 +1,10 @@
+{% extends "admin/base_site.html" %}
+
+{% block footer %}
+    <div class="footer">
+        {% if IMAGE_TAG_TIMESTAMP %}
+            <span>Image Tag: {{ IMAGE_TAG_TIMESTAMP }}</span>
+        {% endif %}
+        {{ block.super }}
+    </div>
+{% endblock %}

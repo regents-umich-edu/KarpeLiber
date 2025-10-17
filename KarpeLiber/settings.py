@@ -15,8 +15,6 @@ import os
 from pathlib import Path
 from typing import IO
 
-# from main.apps import MainConfig
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -43,6 +41,7 @@ ALLOWED_HOSTS = CONFIG.get('ALLOWED_HOSTS', ['127.0.0.1', 'localhost'])
 # Application definition
 
 INSTALLED_APPS = [
+    'main.apps.MainConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -52,8 +51,6 @@ INSTALLED_APPS = [
     'django_extensions',
     'mathfilters',
     'corsheaders',
-    # f'{MainConfig.__module__}.{MainConfig.__name__}',
-    'main.apps.MainConfig',
 ]
 
 MIDDLEWARE = [
@@ -93,6 +90,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'main.context_processors.image_tag_timestamp',
             ],
         },
     },

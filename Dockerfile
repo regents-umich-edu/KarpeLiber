@@ -4,6 +4,8 @@ FROM python:3.13.7-slim
 ENV PYTHONUNBUFFERED=1
 RUN mkdir /code
 WORKDIR /code
+ARG IMAGE_TAG_TIMESTAMP
+ENV IMAGE_TAG_TIMESTAMP=$IMAGE_TAG_TIMESTAMP
 COPY requirements.txt .
 # See packages at: https://packages.debian.org/#search_packages
 RUN apt-get update && \
