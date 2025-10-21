@@ -20,7 +20,8 @@ services:
     build:
       context: .
       args:
-        IMAGE_TAG_TIMESTAMP: "localdev-19700101T000000Z"
+        # This argument normally specified by docker-image.yaml CI.
+        IMAGE_TAG_TIMESTAMP: 'localdev-19700101T000000Z'
     restart: always
     volumes:
       - .:/code
