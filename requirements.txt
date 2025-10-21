@@ -19,3 +19,5 @@ tzdata==2023.3
 # Moved to `apt-get` package in Dockerfile to avoid OpenShift build issues.
 #numpy==2.0.2
 
+gunicorn==23.0.0
+whitenoise==6.11.0

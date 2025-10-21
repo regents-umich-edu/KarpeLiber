@@ -89,5 +89,7 @@ export GIT_BRANCH="$(git name-rev $GIT_COMMIT --name-only)"
 #  python manage.py site --domain="${DOMAIN}" --name="${DOMAIN}"
 #fi
 
-# TODO: DO NOT USE THIS SERVER IN A PRODUCTION SETTING (https://docs.djangoproject.com/en/3.1/ref/django-admin/#runserver)
-python manage.py runserver 0.0.0.0:8000
+echo 'Collecting static files…'
+python manage.py collectstatic --noinput
+
+gunicorn KarpeLiber.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 120
