@@ -2,7 +2,8 @@
 # python:3.13-slim from openshift namespace
 FROM python:3.13.7-slim
 ENV PYTHONUNBUFFERED=1
-RUN mkdir /code
+# Makes directories /code and /code/staticfiles
+RUN mkdir -p /code/staticfiles
 WORKDIR /code
 ARG IMAGE_TAG_TIMESTAMP
 ENV IMAGE_TAG_TIMESTAMP=$IMAGE_TAG_TIMESTAMP
