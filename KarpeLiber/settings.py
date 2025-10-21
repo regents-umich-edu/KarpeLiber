@@ -34,7 +34,7 @@ CONFIG = json.load(configFile)
 SECRET_KEY = CONFIG.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool(CONFIG.get('DEBUG', False))
 
 ALLOWED_HOSTS = CONFIG.get('ALLOWED_HOSTS', ['127.0.0.1', 'localhost'])
 
