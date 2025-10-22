@@ -1,6 +1,6 @@
 # In OpenShift, config bc to override with
 # python:3.13-slim from openshift namespace
-FROM python:3.13.7-slim
+FROM python:3.13.9-slim
 ENV PYTHONUNBUFFERED=1
 # Makes directories /code and /code/staticfiles
 RUN mkdir -p /code/staticfiles && chmod -R 0777 /code/staticfiles
