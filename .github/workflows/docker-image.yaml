@@ -43,7 +43,8 @@ jobs:
         with:
           context: .
           file: Dockerfile
-          build-args: IMAGE_TAG_TIMESTAMP=${{ env.IMAGE_TAG_TIMESTAMP }}
+          build-args: |
+            IMAGE_TAG_TIMESTAMP=${{ env.IMAGE_TAG_TIMESTAMP }}
           push: true
           tags: |
             ${{ env.LATEST_TAG }}
