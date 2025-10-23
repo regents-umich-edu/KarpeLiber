@@ -20,7 +20,7 @@ class CsvImportForm(forms.Form):
     """
     Form used by ModelAdminCsvImport
     """
-    csv_file = fields.FileField()
+    csv_file = forms.FileField()
     csv_file.label = 'CSV file'
     # csv_file.help_text = 'list of column names or something helpful'
     csv_file.required = True
