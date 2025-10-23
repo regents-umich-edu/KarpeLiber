@@ -33,7 +33,7 @@ jobs:
 
       - name: Log in to GitHub Container Registry
         # Log in iff GHCR_PAT secret is available
-        if: secrets.GHCR_PAT != ''
+        if: ${{ secrets.GHCR_PAT != '' }}
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
