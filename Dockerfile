@@ -3,7 +3,7 @@
 FROM python:3.13.9-slim
 ENV PYTHONUNBUFFERED=1
 # Makes directories /code and /code/staticfiles
-RUN mkdir -p /code/staticfiles && chmod -R 0755 /code/staticfiles
+RUN mkdir -p /code/staticfiles && chmod -R 0775 /code/staticfiles
 WORKDIR /code
 ARG IMAGE_TAG_TIMESTAMP
 ENV IMAGE_TAG_TIMESTAMP=$IMAGE_TAG_TIMESTAMP
