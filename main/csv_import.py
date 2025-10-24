@@ -7,7 +7,7 @@ import pandas as pd
 from django.contrib import messages
 from django.contrib.admin import ModelAdmin
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.forms import forms, fields
+from django.forms import forms
 from django.shortcuts import redirect, render
 from django.urls import path
 
