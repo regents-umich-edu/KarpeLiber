@@ -9,6 +9,10 @@ services:
       MYSQL_DATABASE: karpeliber
       MYSQL_USER: karpeliber
       MYSQL_PASSWORD: karpeliber
+    ports:
+      # This port only needs exposure for local DB client access.
+      # Otherwise, the app will run without this port mapping.
+      - '3306:3306'
 
   db_admin:
     image: adminer
@@ -17,7 +21,11 @@ services:
       - '127.0.0.1:8080:8080'
 
   web:
-    build: .
+    build:
+      context: .
+      args:
+        # This argument normally specified by docker-image.yaml CI.
+        IMAGE_TAG_TIMESTAMP: 'localdev-19700101T000000Z'
     restart: always
     volumes:
       - .:/code

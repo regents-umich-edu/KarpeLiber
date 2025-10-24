@@ -1,0 +1,11 @@
+{% extends "admin/base.html" %}
+
+{% block footer %}
+    <hr>
+    <footer class="branding" style="padding: 10px 20px; border-top-width: 1px; border-top-style: solid;">
+        {% if IMAGE_TAG_TIMESTAMP %}
+            <span style="font-weight: bold;">Image Tag:</span> {{ IMAGE_TAG_TIMESTAMP }}
+        {% endif %}
+        {{ block.super }}
+    </footer>
+{% endblock %}

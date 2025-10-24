@@ -131,3 +131,4 @@ dmypy.json
 #KarpeLiber
 .secrets
 .data
+staticfiles

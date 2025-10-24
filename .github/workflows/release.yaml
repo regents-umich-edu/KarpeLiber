@@ -1,0 +1,49 @@
+name: Build Package on Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+# This simple build works, but doesn't include the package in the release
+#      - name: Build Docker image
+#        run: docker build -t my-package:latest .
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+# Temporarily hard-code lowercase repo name in steps below.
+# This is a workaround for the "repository name must be lowercase" error.
+
+      - name: Build Docker image
+#        run: docker build -t ghcr.io/${{ github.repository }}/my-package:latest .
+        run: docker build -t ghcr.io/sloanlance/karpeliber/my-package:latest .
+
+      - name: Push Docker image
+#        run: docker push ghcr.io/${{ github.repository }}/my-package:latest
+        run: docker push ghcr.io/sloanlance/karpeliber/my-package:latest
+
+# These steps try to build the app as a (PyPI?) package
+#      - name: Run Docker container and build package
+#        run: docker run --rm -v $(pwd):/app my-package:latest /bin/bash -c "cd /app && python setup.py sdist bdist_wheel"
+#
+#      - name: Upload package
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: my-package
+#          path: dist/*

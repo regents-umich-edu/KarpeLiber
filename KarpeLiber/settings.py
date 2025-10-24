@@ -15,8 +15,6 @@ import os
 from pathlib import Path
 from typing import IO
 
-# from main.apps import MainConfig
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -36,13 +34,14 @@ CONFIG = json.load(configFile)
 SECRET_KEY = CONFIG.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = CONFIG.get('DEBUG', False) is True
 
 ALLOWED_HOSTS = CONFIG.get('ALLOWED_HOSTS', ['127.0.0.1', 'localhost'])
 
 # Application definition
 
 INSTALLED_APPS = [
+    'main.apps.MainConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -52,11 +51,10 @@ INSTALLED_APPS = [
     'django_extensions',
     'mathfilters',
     'corsheaders',
-    # f'{MainConfig.__module__}.{MainConfig.__name__}',
-    'main.apps.MainConfig',
 ]
 
 MIDDLEWARE = [
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -66,6 +64,11 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CSRF_TRUSTED_ORIGINS = CONFIG.get('CSRF_TRUSTED_ORIGINS', [
+    'http://127.0.0.1:8000',  # For local development
+    'http://localhost:8000',  # For local development
+])
 
 CORS_ALLOWED_ORIGINS = [
     'https://regents-archive-form.netlify.app',
@@ -88,6 +91,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'main.context_processors.image_tag_timestamp',
             ],
         },
     },
@@ -149,6 +153,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 LOGGING = {
     'version': 1,

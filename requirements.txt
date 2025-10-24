@@ -1,23 +1,23 @@
-#Django>=3.0,<4.0
-Django==3.2.20
-#psycopg2-binary>=2.8
-psycopg2-binary==2.9.6
+Django==4.2.24
 mysqlclient==1.4.6
-django-extensions==3.0.9
-#pandas==2.1.2
-pandas==1.1.3
-#django-cors-headers==4.3.0
-# prod:4.2.0, test:4.1.0
-django-cors-headers==4.2.0
+django-extensions==4.1
+pandas==2.3.2
+django-cors-headers==4.9.0
 
 # Adds Django template filters for subtraction, etc.
 django-mathfilters==1.0.0
 
 ## The following requirements were added by pip freeze:
-asgiref==3.7.2
-numpy==1.25.1
-python-dateutil==2.8.2
-pytz==2023.3
-six==1.16.0
-sqlparse==0.4.4
-typing_extensions==4.7.1
+asgiref==3.9.2
+python-dateutil==2.9.0.post0
+pytz==2025.2
+six==1.17.0
+sqlparse==0.5.3
+typing_extensions==4.15.0
+tzdata==2023.3
+
+# Moved to `apt-get` package in Dockerfile to avoid OpenShift build issues.
+#numpy==2.0.2
+
+gunicorn==23.0.0
+whitenoise==6.11.0

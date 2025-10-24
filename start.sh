@@ -1,17 +1,17 @@
-#!/bin/bash 
+#!/bin/bash
 
 # Case insenstive match
 shopt -s nocaseglob
 
 if [ -z "${ENV_FILE}" ]; then
-    ENV_FILE="/secrets/env.json"
+  ENV_FILE="/secrets/env.json"
 fi
 
-echo 'Checking for environment file "'${ENV_FILE}'"...'
+echo 'Checking for environment file "'${ENV_FILE}'"…'
 
 if [ ! -f "${ENV_FILE}" ]; then
-    echo 'Error: Environment file "'${ENV_FILE}'" not found!'
-    exit 1
+  echo 'Error: Environment file "'${ENV_FILE}'" not found!'
+  exit 1
 fi
 
 echo 'Using environment file "'${ENV_FILE}'"...'
@@ -76,10 +76,13 @@ if [ -n "${DB_TUNNEL_PORT}" ]; then
   socat "TCP-LISTEN:${DB_TUNNEL_PORT},fork" "TCP:${DB_HOST}:${DB_PORT}" &
 fi
 
-echo 'Setting Git info variables...'
+echo 'Setting Git info variables…'
 export GIT_REPO="$(git config --local remote.origin.url)"
+echo "  GIT_REPO=${GIT_REPO}"
 export GIT_COMMIT="$(git rev-parse HEAD)"
+echo "  GIT_COMMIT=${GIT_COMMIT}"
 export GIT_BRANCH="$(git name-rev $GIT_COMMIT --name-only)"
+echo "  GIT_BRANCH=${GIT_BRANCH}"
 
 #echo "Setting domain of default site record"
 ## The value for LOCALHOST_PORT is set in docker-compose.yml
@@ -89,5 +92,7 @@ export GIT_BRANCH="$(git name-rev $GIT_COMMIT --name-only)"
 #  python manage.py site --domain="${DOMAIN}" --name="${DOMAIN}"
 #fi
 
-# TODO: DO NOT USE THIS SERVER IN A PRODUCTION SETTING (https://docs.djangoproject.com/en/3.1/ref/django-admin/#runserver)
-python manage.py runserver 0.0.0.0:8000
+echo 'Collecting static files…'
+python manage.py collectstatic --noinput
+
+gunicorn KarpeLiber.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 120
