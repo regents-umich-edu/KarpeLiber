@@ -188,7 +188,8 @@ class ItemPage(models.Model):
         return result
 
     def __str__(self):
-        return (f'ItemPage {self.page} ({self.volume}, '
+        return (f'ItemPage {self.page} ('
+                f'{self.volume if self.volume else "NO_VOLUME"}, '
                 f'{self.date.strftime("%Y-%b") if self.date else "NO_DATE"})')
 
 
