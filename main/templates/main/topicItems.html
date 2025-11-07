@@ -106,9 +106,9 @@
             {% endif %}
             Volume:
             {% if not item.volume %}
-            n/a;
+            [no volume];
             {% else %}
-            {{ item.volume.title|default_if_none:"n/a" }};
+            {{ item.volume.title|default_if_none:"[untitled volume]" }};
             {% endif %}
             Page: {{ item.page|default_if_none:"n/a" }}
             <br/>
