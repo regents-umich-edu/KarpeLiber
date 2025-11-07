@@ -105,7 +105,7 @@
             {% comment "Intentionally left blank" %}{% endcomment %}
             {% endif %}
             Volume:
-            {% if item.volume is None %}
+            {% if not item.volume %}
             n/a;
             {% else %}
             {{ item.volume.title|default_if_none:"n/a" }};
