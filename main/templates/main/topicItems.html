@@ -104,7 +104,12 @@
             {% else %}
             {% comment "Intentionally left blank" %}{% endcomment %}
             {% endif %}
-            Volume: {{ item.volume.title|default_if_none:"n/a" }};
+            Volume:
+            {% if not item.volume %}
+            [no volume];
+            {% else %}
+            {{ item.volume.title|default_if_none:"[untitled volume]" }};
+            {% endif %}
             Page: {{ item.page|default_if_none:"n/a" }}
             <br/>
             {% for itemNote in item.item.itemNotes.all %}
