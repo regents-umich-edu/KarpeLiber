@@ -1,6 +1,6 @@
 import os
 
-def image_tag_timestamp(request):
+def image_tag(request):
     return {
-        'IMAGE_TAG_TIMESTAMP': os.environ.get('IMAGE_TAG_TIMESTAMP', '')
+        'IMAGE_TAG': os.environ.get('IMAGE_TAG', '')
     }
