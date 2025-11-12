@@ -5,8 +5,8 @@ ENV PYTHONUNBUFFERED=1
 # Makes directories /code and /code/staticfiles
 RUN mkdir -p /code/staticfiles && chmod -R 0775 /code/staticfiles
 WORKDIR /code
-ARG IMAGE_TAG_TIMESTAMP
-ENV IMAGE_TAG_TIMESTAMP=$IMAGE_TAG_TIMESTAMP
+ARG IMAGE_TAG
+ENV IMAGE_TAG=$IMAGE_TAG
 COPY requirements.txt .
 # See packages at: https://packages.debian.org/#search_packages
 RUN apt-get update && \
