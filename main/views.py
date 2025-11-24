@@ -1,8 +1,8 @@
 import logging
 from typing import Tuple, Optional
 
-from django.db.models import QuerySet, Count, Q
-from django.db.models.functions import Coalesce
+from django.db.models import Count, IntegerField, Q, QuerySet
+from django.db.models.functions import Cast, Coalesce
 from django.http import HttpResponse, HttpRequest
 from django.shortcuts import get_object_or_404, render
 
@@ -53,8 +53,9 @@ def search(request: HttpRequest):
         else:
             maxItems = 10
 
-        # sort_date is item date if present, otherwise volume dateBegin
-        itemOrderFields: Tuple[str, ...] = ('-sort_date', '-page',
+        # sort_date:  item date if present, otherwise volume dateBegin
+        # page_num:  page cast to integer
+        itemOrderFields: Tuple[str, ...] = ('-sort_date', '-page_num',
                                             'item__name')
 
         itemFilterArgs: Optional[Q] = None
@@ -86,6 +87,7 @@ def search(request: HttpRequest):
                 items = (
                     ItemPage.objects
                     .annotate(sort_date=Coalesce('date', 'volume__dateBegin'))
+                    .annotate(page_num=Cast('page', IntegerField()))
                     .filter(itemFilterArgs)
                     .order_by(*itemOrderFields)
                 )
