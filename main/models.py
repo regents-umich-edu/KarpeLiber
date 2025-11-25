@@ -139,8 +139,7 @@ class ItemPage(models.Model):
         related_name='volumeItemPages',
         on_delete=models.DO_NOTHING,
         null=True)
-    # A few page numbers may be Roman numerals, have letter suffix, etc.
-    page = models.CharField('page number', max_length=20)
+    page = models.IntegerField('page number')
     date: datetime.date = models.DateField(
         'date of mention',
         null=True,
