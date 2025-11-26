@@ -54,8 +54,7 @@ def search(request: HttpRequest):
             maxItems = 10
 
         # sort_date:  item date if present, otherwise volume dateBegin
-        # page_num:  page cast to integer
-        itemOrderFields: Tuple[str, ...] = ('-sort_date', '-page_num',
+        itemOrderFields: Tuple[str, ...] = ('-sort_date', '-page',
                                             'item__name')
 
         itemFilterArgs: Optional[Q] = None
@@ -87,7 +86,6 @@ def search(request: HttpRequest):
                 items = (
                     ItemPage.objects
                     .annotate(sort_date=Coalesce('date', 'volume__dateBegin'))
-                    .annotate(page_num=Cast('page', IntegerField()))
                     .filter(itemFilterArgs)
                     .order_by(*itemOrderFields)
                 )
