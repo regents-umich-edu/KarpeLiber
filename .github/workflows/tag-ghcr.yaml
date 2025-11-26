@@ -40,8 +40,5 @@ jobs:
           docker tag ghcr.io/${{ github.event.inputs.image_name }}:${{ github.event.inputs.existing_tag }} ghcr.io/${{ github.event.inputs.image_name }}:${{ github.event.inputs.new_tag }}
 
       - name: Push new tag to GHCR
-        uses: docker/build-push-action@v5
-        with:
-          context: . # Can be any path, as we are only pushing a pre-tagged image
-          push: true
-          tags: ghcr.io/${{ github.event.inputs.image_name }}:${{ github.event.inputs.new_tag }}
+        run: |
+          docker push ghcr.io/${{ github.event.inputs.image_name }}:${{ github.event.inputs.new_tag }}
