@@ -1,7 +1,8 @@
 import logging
 from typing import Tuple, Optional
 
-from django.db.models import QuerySet, Count, Q
+from django.db.models import Count, IntegerField, Q, QuerySet
+from django.db.models.functions import Cast, Coalesce
 from django.http import HttpResponse, HttpRequest
 from django.shortcuts import get_object_or_404, render
 
@@ -52,7 +53,10 @@ def search(request: HttpRequest):
         else:
             maxItems = 10
 
-        itemOrderFields: Tuple[str, ...] = ('-year', 'page', 'item__name')
+        # sort_date:  item date if present, otherwise volume dateBegin
+        itemOrderFields: Tuple[str, ...] = ('-sort_date', '-page',
+                                            'item__name')
+
         itemFilterArgs: Optional[Q] = None
 
         if searchString or topicId:
@@ -79,9 +83,12 @@ def search(request: HttpRequest):
                                                searchString)
 
             if not moreTopics:
-                items = (ItemPage.objects.filter(itemFilterArgs)
-                         .order_by(*itemOrderFields))
-                logger.debug(items)
+                items = (
+                    ItemPage.objects
+                    .annotate(sort_date=Coalesce('date', 'volume__dateBegin'))
+                    .filter(itemFilterArgs)
+                    .order_by(*itemOrderFields)
+                )
 
     if moreTopics:
         if moreTopics == len(topics):
